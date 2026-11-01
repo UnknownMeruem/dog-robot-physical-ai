@@ -1,0 +1,21 @@
+{
+  "test": "LIVE_DEPTH_REPLANNING",
+  "status": "NO_STATIC_ROUTE",
+  "start_xy": [
+    -0.22038498686604566,
+    0.42642822303482175
+  ],
+  "depth_nearest_m": 0.6962418451851532,
+  "observed_points": 796,
+  "estimated_box_min": [
+    -1.109575857790895,
+    0.7497999288991302
+  ],
+  "estimated_box_max": [
+    -0.8008998782862073,
+    1.0012843742562383
+  ],
+  "start_clearance_m": 0.6645049279833483,
+  "required_clearance_m": 0.521,
+  "candidate_count": 0
+}

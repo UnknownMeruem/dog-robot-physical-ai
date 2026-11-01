@@ -1,0 +1,41 @@
+[
+  {
+    "case": "baseline",
+    "dx_m": 0.0,
+    "dy_m": 0.0,
+    "exit_code": 0,
+    "reported_pass": true,
+    "final_xy": [
+      -0.990207350563813,
+      1.5398175822652178
+    ],
+    "trace_samples": 12849,
+    "pass": true
+  },
+  {
+    "case": "box_y_plus_10cm",
+    "dx_m": 0.0,
+    "dy_m": 0.1,
+    "exit_code": 0,
+    "reported_pass": false,
+    "final_xy": [
+      -0.22038498686604566,
+      0.42642822303482175
+    ],
+    "trace_samples": 0,
+    "pass": false
+  },
+  {
+    "case": "box_y_minus_10cm",
+    "dx_m": 0.0,
+    "dy_m": -0.1,
+    "exit_code": 0,
+    "reported_pass": true,
+    "final_xy": [
+      -0.9806728772934753,
+      1.4987631028855695
+    ],
+    "trace_samples": 14329,
+    "pass": true
+  }
+]

@@ -1,0 +1,487 @@
+0883 
+0884             if candidates:
+0885                 length,minimum,via = min(
+0886                     candidates,key=lambda x:x[0]
+0887                 )
+0888                 live_report.update({
+0889                     "waypoint": via.tolist(),
+0890                     "route_clearance_m": minimum,
+0891                     "route_length_m": length,
+0892                 })
+0893                 print("Generated waypoint:",np.round(via,4))
+0894                 print("Route clearance:",f"{minimum:.3f}m")
+0895 
+0896             if start_clear < clearance_required:
+0897                 print("LIVE_REPLAN: START_TOO_CLOSE")
+0898                 live_report["status"] = "START_TOO_CLOSE"
+0899             elif not candidates:
+0900                 print("LIVE_REPLAN: NO_STATIC_ROUTE")
+0901             else:
+0902                 print("LIVE_REPLAN: STATIC_CANDIDATE")
+0903 
+0904 report_path = out_dir / "step4_unified_x_minus_05_early_live_replan_result_v3_early.json"
+0905 report_path.write_text(
+
+==========
+
+1021         np.abs(data.qpos[:2] - center) - half, 0.0
+1022     )
+1023     return float(np.linalg.norm(offset))
+1024 
+1025 def angle_error(target, current):
+1026     return (target - current + 180) % 360 - 180
+1027 
+1028 def guard():
+1029     est = estimated_clearance()
+1030     extra = xy_clearance(extra_id)
+1031     red = xy_clearance(box_id)
+1032     height, tilt = posture()
+1033 
+1034     collision = False
+1035     for j in range(data.ncon):
+1036         c = data.contact[j]
+1037         if extra_id in (int(c.geom1), int(c.geom2)):
+1038             collision = True
+1039         if box_id in (int(c.geom1), int(c.geom2)):
+1040             collision = True
+1041 
+1042     if collision:
+1043         reason = "CONTACT_STOP"
+1044     elif not np.all(np.isfinite([
+
+==========
+
+1059     trace.append({
+1060         "section": section,
+1061         "time_s": float(data.time),
+1062         "stage": stage,
+1063         "x_m": float(data.qpos[0]),
+1064         "y_m": float(data.qpos[1]),
+1065         "yaw_deg": float(yaw_deg()),
+1066         "estimated_clearance_m": est,
+1067         "extra_clearance_m": extra,
+1068         "red_clearance_m": red,
+1069         "height_m": height,
+1070         "tilt_deg": tilt,
+1071         "depth_m": depth,
+1072         "guard_reason": state or "",
+1073         "stop_reason": reason,
+1074     })
+1075     return state
+1076 
+1077 def soft_hold(section, reason):
+1078     global stage, stage_start
+1079     stage = "stopping"
+1080     stage_start = float(data.time)
+1081     start = float(data.time)
+
+==========
+
+1090 
+1091         set_legs(stage, float(data.time)-stage_start)
+1092         mujoco.mj_step(model, data)
+1093         record(section, reason, float("nan"))
+1094 
+1095     return stage == "hold"
+1096 
+1097 def turn_to(section, goal):
+1098     global stage, stage_start, target_angle
+1099 
+1100     delta = goal-data.qpos[:2]
+1101     desired = math.degrees(math.atan2(-delta[1],-delta[0]))
+1102     initial = yaw_deg()
+1103     command = angle_error(desired, initial)
+1104 
+1105     print(f"{section}: turn command={command:+.2f}deg")
+1106 
+1107     if guard()[0]:
+1108         return "START_GUARD_STOP"
+1109 
+1110     if abs(command) <= 2.0:
+1111         return "TURN_ALREADY_ALIGNED"
+1112 
+
+==========
+
+1141 
+1142     print(
+1143         f"{section}: {reason}, "
+1144         f"yaw_error={final_error:.2f}deg"
+1145     )
+1146     return reason
+1147 
+1148 def walk_to(section, goal, renderer, timeout=28):
+1149     global stage, stage_start
+1150 
+1151     if guard()[0]:
+1152         return "START_GUARD_STOP"
+1153 
+1154     start_xy = data.qpos[:2].copy()
+1155     start_yaw = yaw_deg()
+1156     heading = math.radians(start_yaw)
+1157     direction = np.array([
+1158         -math.cos(heading),-math.sin(heading)
+1159     ])
+1160     initial_goal_distance = float(np.linalg.norm(goal-start_xy))
+1161 
+1162     stage = "walk"
+1163     stage_start = float(data.time)
+
+==========
+
+1198         if lateral > 0.08:
+1199             reason = "PATH_DEVIATION_STOP"
+1200             break
+1201         if abs(angle_error(start_yaw,yaw_deg())) > 10:
+1202             reason = "HEADING_STOP"
+1203             break
+1204         if error <= (
+1205             FINAL_TOL if section == "FINAL_WALK"
+1206             else WAYPOINT_TOL
+1207         ):
+1208             reason = "GOAL_TRIGGERED"
+1209             break
+1210         if forward > initial_goal_distance+0.10:
+1211             reason = "DISTANCE_LIMIT_STOP"
+1212             break
+1213 
+1214         set_legs("walk",t-stage_start)
+1215         mujoco.mj_step(model,data)
+1216         failure = record(section,"",nearest)
+1217         if failure:
+1218             reason = failure
+1219             break
+1220 
+
+==========
+
+1231         f"goal_error={final_error:.3f}m, "
+1232         f"final_xy={np.round(data.qpos[:2],4)}"
+1233     )
+1234     return reason
+1235 
+1236 print("\n=== GATE 3 STEP 3: LIVE AUTONOMOUS ROUTE ===")
+1237 
+1238 CLEARANCE = 0.521
+1239 PLANNING_CLEARANCE = 0.551
+1240 MAX_TILT = 12.0
+1241 MIN_HEIGHT = 0.16
+1242 WAYPOINT_TOL = 0.11
+1243 FINAL_TOL = 0.11
+1244 
+1245 trace = []
+1246 results = []
+1247 stage3_reason = "NOT_STARTED"
+1248 stage3_ok = False
+1249 
+1250 extra_id = mujoco.mj_name2id(
+1251     model, mujoco.mjtObj.mjOBJ_GEOM,
+1252     "extra_blocking_box"
+1253 )
+1254 if extra_id < 0 or box_id < 0:
+
+==========
+
+1282         np.maximum(
+1283             goal_policy_low - goal_policy_target,
+1284             goal_policy_target - goal_policy_high,
+1285         ),
+1286         0.0,
+1287     )
+1288     goal_policy_clearance = float(np.linalg.norm(diff))
+1289     goal_policy_unsafe = goal_policy_clearance < PLANNING_CLEARANCE
+1290 
+1291 print("GOAL_POLICY_CLEARANCE:",
+1292       f"{goal_policy_clearance:.4f}m")
+1293 print("GOAL_POLICY_UNSAFE:", goal_policy_unsafe)
+1294 
+1295 if (
+1296     goal_policy_unsafe
+1297     or live_report.get("status") != "PLANNED"
+1298     or reason2 != "DEPTH_OBSTACLE_STOP"
+1299     or stage != "hold"
+1300 ):
+1301     stage3_reason = "LIVE_OBSERVATION_NOT_READY"
+1302 else:
+1303     low = np.array(live_report["estimated_box_min"])
+1304     high = np.array(live_report["estimated_box_max"])
+1305     goal = np.array([-1.10, 1.50])
+1306 
+1307     def estimated_clearance():
+1308         xy = data.qpos[:2]
+1309         delta = np.maximum(
+1310             np.maximum(low - xy, xy - high), 0.0
+1311         )
+1312         return float(np.linalg.norm(delta))
+1313 
+1314     def segment(a, b):
+1315         steps = max(
+1316             2,
+1317             int(np.ceil(np.linalg.norm(b-a)/0.005)) + 1
+1318         )
+1319         t = np.linspace(0, 1, steps)[:, None]
+1320         return a + t*(b-a)
+1321 
+1322     def route_clearance(path):
+1323         delta = np.maximum(
+1324             np.maximum(low-path, path-high), 0.0
+1325         )
+1326         return float(np.linalg.norm(delta, axis=1).min())
+1327 
+1328     def route_candidates():
+1329         start = data.qpos[:2].copy()
+1330         current_yaw = yaw_deg()
+1331         choices = []
+1332         for y in np.arange(1.00, 2.31, 0.05):
+1333             for x in np.arange(-0.85, 0.81, 0.05):
+1334                 via = np.array([x, y])
+1335                 path = np.vstack((
+1336                     segment(start, via),
+1337                     segment(via, goal)
+1338                 ))
+1339                 minimum = route_clearance(path)
+1340                 if minimum < PLANNING_CLEARANCE:
+1341                     continue
+1342 
+1343                 displacement = via-start
+1344                 desired = math.degrees(math.atan2(
+1345                     -displacement[1], -displacement[0]
+1346                 ))
+1347                 correction = abs(
+1348                     (desired-current_yaw+180)%360-180
+1349                 )
+1350                 length = (
+1351                     np.linalg.norm(via-start)
+1352                     + np.linalg.norm(goal-via)
+1353                 )
+1354                 score = length + 0.005*correction \
+1355                         + 4.0/max(minimum, 0.001)
+1356                 choices.append(
+1357                     (score, minimum, length, via)
+1358                 )
+1359         return sorted(choices, key=lambda item: item[0])
+1360 
+1361     choices = route_candidates()
+1362     print("Live observed points:",
+1363           live_report.get("observed_points"))
+1364     print("Current XY:", np.round(data.qpos[:2], 4))
+1365     print("Start clearance:",
+1366           f"{estimated_clearance():.3f}m")
+1367     print("Candidates with 3cm extra reserve:",
+1368           len(choices))
+1369 
+1370     if estimated_clearance() < CLEARANCE:
+1371         stage3_reason = "START_CLEARANCE_INSUFFICIENT"
+1372     elif not choices:
+1373         stage3_reason = "NO_ROBUST_ROUTE"
+1374     else:
+1375         _, predicted, length, via = choices[0]
+1376         print("Selected live waypoint:",
+1377               np.round(via, 4))
+1378         print("Predicted minimum clearance:",
+1379               f"{predicted:.3f}m")
+1380         print("Planned path length:",
+1381               f"{length:.3f}m")
+1382 
+1383         depth_path = (
+1384             HERE / "../gate3_obstacle_stop_v01/"
+1385             "obstacle_stop_background_test.py"
+
+==========
+
+1412 
+1413         stage3_reason = "RUNNING"
+1414 
+1415         with mujoco.Renderer(
+1416             model, width=640, height=360
+1417         ) as renderer:
+1418             # First heading adjustment uses actual stop pose.
+1419             turn1 = turn_to("LIVE_TURN1", via)
+1420             print("Live turn 1:", turn1)
+1421 
+1422             # Re-evaluate using the actual pose AFTER turning.
+1423             # A turn can translate the robot by several centimeters.
+1424             walk1 = "NOT_STARTED"
+1425             if turn1 in ("TURN_REACHED", "TURN_ALREADY_ALIGNED"):
+1426                 for correction_iteration in range(6):
+1427                     candidates_now = route_candidates()
+1428                     print(
+1429                         "POST_TURN_CANDIDATES:",
+1430                         len(candidates_now),
+1431                         "iteration:", correction_iteration
+1432                     )
+1433 
+1434                     if not candidates_now:
+1435                         walk1 = "NO_SAFE_POST_TURN_ROUTE"
+1436                         break
+1437 
+1438                     # Favor a wider margin over the shortest route.
+1439                     candidates_now.sort(
+1440                         key=lambda c: (
+1441                             -c[1],
+1442                             c[2],
+1443                             c[0]
+1444                         )
+
+==========
+
+1466                         break
+1467 
+1468                     print(
+1469                         "POST_TURN_HEADING_CORRECTION:",
+1470                         f"{yaw_error:.2f}deg"
+1471                     )
+1472                     correction_result = turn_to(
+1473                         "LIVE_CORRECTIVE_TURN",
+1474                         via
+1475                     )
+1476                     if correction_result not in (
+1477                         "TURN_REACHED",
+1478                         "TURN_ALREADY_ALIGNED"
+1479                     ):
+1480                         walk1 = correction_result
+1481                         break
+1482                 else:
+1483                     walk1 = "CORRECTION_ITERATION_LIMIT"
+1484 
+1485                 if walk1 == "NOT_STARTED":
+1486                     start_now = data.qpos[:2].copy()
+1487                     delta_now = via - start_now
+1488                     length_now = float(np.linalg.norm(delta_now))
+
+==========
+
+1500                         (length_now + 0.04)
+1501                     )
+1502                     planned_line = segment(start_now, via)
+1503                     commanded_line = segment(
+1504                         start_now, commanded_end
+1505                     )
+1506                     predicted_line = min(
+1507                         route_clearance(planned_line),
+1508                         route_clearance(commanded_line)
+1509                     )
+1510 
+1511                     print(
+1512                         "POST_TURN_ACTUAL_XY:",
+1513                         np.round(start_now, 4)
+1514                     )
+1515                     print(
+1516                         "POST_TURN_PREDICTED_CLEARANCE:",
+1517                         f"{predicted_line:.3f}m"
+1518                     )
+1519 
+1520                     if guard()[0]:
+1521                         walk1 = "POST_TURN_GUARD_STOP"
+1522                     elif predicted_line < PLANNING_CLEARANCE:
+1523                         walk1 = "POST_TURN_ROUTE_REJECTED"
+1524                     else:
+1525                         walk1 = walk_to(
+1526                             "LIVE_WAYPOINT_WALK",
+1527                             via, renderer, timeout=32
+1528                         )
+1529                         print("Live waypoint walk:", walk1)
+1530             else:
+1531                 walk1 = "FIRST_TURN_FAILED"
+1532 
+1533             if walk1 == "GOAL_TRIGGERED":
+1534                 turn2 = turn_to("LIVE_FINAL_TURN", goal)
+1535                 print("Live final turn:", turn2)
+1536             else:
+1537                 turn2 = "NOT_STARTED"
+1538 
+1539             if turn2 in (
+1540                 "TURN_REACHED", "TURN_ALREADY_ALIGNED"
+1541             ):
+1542                 walk2 = walk_to(
+1543                     "FINAL_WALK",
+1544                     goal, renderer, timeout=32
+1545                 )
+1546                 print("Live final walk:", walk2)
+1547             else:
+1548                 walk2 = "NOT_STARTED"
+1549 
+1550         final_error = float(np.linalg.norm(
+1551             data.qpos[:2]-goal
+1552         ))
+1553 
+1554         # The trace also includes stopping and holding.
+1555         clear_ok = (
+1556             bool(trace)
+1557             and all(
+1558                 np.isfinite([
+1559                     r["estimated_clearance_m"],
+1560                     r["extra_clearance_m"],
+1561                     r["red_clearance_m"],
+1562                     r["height_m"],
+1563                     r["tilt_deg"]
+1564                 ]).all()
+1565                 and min(
+1566                     r["estimated_clearance_m"],
+1567                     r["extra_clearance_m"],
+1568                     r["red_clearance_m"]
+1569                 ) >= CLEARANCE
+1570                 and r["height_m"] >= MIN_HEIGHT
+1571                 and r["tilt_deg"] <= MAX_TILT
+1572                 and r["guard_reason"] == ""
+1573                 for r in trace
+1574             )
+1575         )
+1576 
+1577         stage3_ok = (
+1578             turn1 in ("TURN_REACHED","TURN_ALREADY_ALIGNED")
+1579             and walk1 == "GOAL_TRIGGERED"
+1580             and turn2 in ("TURN_REACHED","TURN_ALREADY_ALIGNED")
+1581             and walk2 == "GOAL_TRIGGERED"
+
+==========
+
+1605 elif goal_policy_unsafe:
+1606     if (
+1607         reason2 == "DEPTH_OBSTACLE_STOP"
+1608         and stage == "hold"
+1609         and len(trace) == 0
+1610         and not stage3_ok
+1611     ):
+1612         stage3_reason = "GOAL_UNSAFE_REJECTED"
+1613     else:
+1614         stage3_reason = "GOAL_POLICY_STOP_VALIDATION_FAILED"
+1615 
+1616 report = {
+1617     "step": 3,
+1618     "status": stage3_reason,
+1619     "pass": bool(stage3_ok),
+1620     "depth_source": "current simulation observation",
+1621     "goal": [-1.10,1.50],
+1622     "final_xy": [float(v) for v in data.qpos[:2]],
+1623     "trace_samples": len(trace),
+1624 }
+1625 report_path = HERE/"step4_unified_x_minus_05_live_autonomous_route_v3.json"
+1626 report_path.write_text(json.dumps(report,indent=2))
+1627 
+
+==========
+
+1640 
+1641 if diagnostic_csv.exists():
+1642     with diagnostic_csv.open(newline="") as f:
+1643         rows = list(csv.DictReader(f))
+1644 
+1645     if rows:
+1646         columns = {
+1647             "camera_estimate": "estimated_clearance_m",
+1648             "extra_box": "extra_clearance_m",
+1649             "red_box": "red_clearance_m",
+1650         }
+1651 
+1652         for label, key in columns.items():
+1653             pairs = [
+1654                 (float(r[key]), r)
+1655                 for r in rows
+1656                 if math.isfinite(float(r[key]))
+1657             ]
+1658             if pairs:
+1659                 value, row = min(pairs, key=lambda p: p[0])
+1660                 print(
+1661                     f"{label}: minimum={value:.4f}m "
+1662                     f"at t={row['time_s']} "

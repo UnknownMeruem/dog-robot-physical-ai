@@ -1,0 +1,15 @@
+{
+  "step": 3,
+  "status": "GOAL_UNSAFE_REJECTED",
+  "pass": false,
+  "depth_source": "current simulation observation",
+  "goal": [
+    -1.1,
+    1.5
+  ],
+  "final_xy": [
+    -0.1721004692131468,
+    0.3330895953733846
+  ],
+  "trace_samples": 0
+}

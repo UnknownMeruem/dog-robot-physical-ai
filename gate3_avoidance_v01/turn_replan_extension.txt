@@ -1,0 +1,187 @@
+
+# ===== Replanned route: first turn only =====
+print("\n=== Replanned Turn Test ===")
+
+replan_goal = np.array([-0.25, 1.50])
+current_xy = data.qpos[:2].copy()
+delta = replan_goal - current_xy
+
+desired_yaw = math.degrees(math.atan2(-delta[1], -delta[0]))
+starting_yaw = yaw_deg()
+turn_command = (desired_yaw - starting_yaw + 180) % 360 - 180
+
+extra_id = mujoco.mj_name2id(
+    model, mujoco.mjtObj.mjOBJ_GEOM, "extra_blocking_box"
+)
+if extra_id < 0:
+    raise RuntimeError("Extra obstacle geom missing")
+
+def xy_clearance(geom_id):
+    center = data.geom_xpos[geom_id, :2]
+    half = model.geom_size[geom_id, :2]
+    offset = np.maximum(
+        np.abs(data.qpos[:2] - center) - half, 0.0
+    )
+    return float(np.linalg.norm(offset))
+
+required = 0.441
+
+print("Starting XY:", np.round(current_xy, 4))
+print("Replan waypoint:", replan_goal)
+print("Starting yaw:", f"{starting_yaw:+.2f}deg")
+print("Desired yaw:", f"{desired_yaw:+.2f}deg")
+print("Requested turn:", f"{turn_command:+.2f}deg")
+
+can_turn = (
+    globals().get("reason2") == "DEPTH_OBSTACLE_STOP"
+    and stage == "hold"
+    and contact2 == 0
+    and xy_clearance(extra_id) >= required
+    and xy_clearance(box_id) >= required
+)
+
+if not can_turn:
+    print("REPLAN_TURN_NOT_STARTED: prerequisites failed")
+else:
+    target_angle = turn_command
+    stage = "turn"
+    stage_start = float(data.time)
+    begin_time = float(data.time)
+
+    turn_reason = ""
+    turn_contacts = 0
+    minimum_extra_clearance = float("inf")
+    minimum_red_clearance = float("inf")
+    maximum_turn_tilt = 0.0
+    minimum_turn_height = float("inf")
+    turn_rows = []
+
+    while float(data.time) - begin_time < 32.0:
+        t = float(data.time)
+        elapsed = t - stage_start
+
+        actual = (yaw_deg() - starting_yaw + 180) % 360 - 180
+        remaining = abs(turn_command) - abs(actual)
+
+        if stage == "turn":
+            if remaining <= 1.5:
+                turn_reason = "REPLAN_ANGLE_REACHED"
+                stage = "stopping"
+                stage_start = t
+                print(
+                    "Turn target reached:",
+                    f"{actual:+.2f}deg"
+                )
+            elif t - begin_time >= 27.0:
+                turn_reason = "REPLAN_TURN_TIMEOUT"
+                stage = "stopping"
+                stage_start = t
+
+        elif stage == "stopping" and elapsed >= 1.0:
+            stage = "hold"
+            stage_start = t
+
+        elif stage == "hold" and elapsed >= 1.0:
+            break
+
+        set_legs(stage, t - stage_start)
+        mujoco.mj_step(model, data)
+
+        height, tilt = posture()
+        maximum_turn_tilt = max(maximum_turn_tilt, tilt)
+        minimum_turn_height = min(minimum_turn_height, height)
+
+        extra_clearance = xy_clearance(extra_id)
+        red_clearance = xy_clearance(box_id)
+
+        minimum_extra_clearance = min(
+            minimum_extra_clearance, extra_clearance
+        )
+        minimum_red_clearance = min(
+            minimum_red_clearance, red_clearance
+        )
+
+        for ci in range(data.ncon):
+            c = data.contact[ci]
+            if (
+                extra_id in (int(c.geom1), int(c.geom2))
+                or box_id in (int(c.geom1), int(c.geom2))
+            ):
+                turn_contacts += 1
+
+        if stage == "turn":
+            if height < 0.16 or tilt > 12.0:
+                turn_reason = "REPLAN_POSTURE_STOP"
+            elif turn_contacts:
+                turn_reason = "REPLAN_CONTACT_STOP"
+            elif min(extra_clearance, red_clearance) < required:
+                turn_reason = "REPLAN_CLEARANCE_STOP"
+
+            if turn_reason:
+                stage = "stopping"
+                stage_start = float(data.time)
+                print("Turn interrupted:", turn_reason)
+
+        turn_rows.append({
+            "time_s": float(data.time),
+            "stage": stage,
+            "x_m": float(data.qpos[0]),
+            "y_m": float(data.qpos[1]),
+            "yaw_deg": yaw_deg(),
+            "tilt_deg": tilt,
+            "height_m": height,
+            "extra_clearance_m": extra_clearance,
+            "red_clearance_m": red_clearance,
+            "contact_samples": turn_contacts,
+        })
+
+    if not turn_reason:
+        turn_reason = "REPLAN_TEST_TIMEOUT"
+
+    turn_csv = HERE / "replanned_turn.csv"
+    if turn_rows:
+        with turn_csv.open("w", newline="") as f:
+            writer = csv.DictWriter(
+                f, fieldnames=list(turn_rows[0])
+            )
+            writer.writeheader()
+            writer.writerows(turn_rows)
+
+    final_yaw_error = (
+        yaw_deg() - desired_yaw + 180
+    ) % 360 - 180
+
+    passed = (
+        turn_reason == "REPLAN_ANGLE_REACHED"
+        and stage == "hold"
+        and abs(final_yaw_error) <= 5.0
+        and turn_contacts == 0
+        and minimum_turn_height >= 0.16
+        and maximum_turn_tilt <= 12.0
+        and minimum_extra_clearance >= required
+        and minimum_red_clearance >= required
+    )
+
+    print("\n=== Replanned Turn Result ===")
+    print("Final XY:", np.round(data.qpos[:2], 4))
+    print("Final yaw:", f"{yaw_deg():+.2f}deg")
+    print("Final yaw error:", f"{final_yaw_error:+.2f}deg")
+    print("Final stage:", stage)
+    print("Stop reason:", turn_reason)
+    print("Contact samples:", turn_contacts)
+    print(
+        "Minimum extra-box clearance:",
+        f"{minimum_extra_clearance:.3f}m"
+    )
+    print(
+        "Minimum red-box clearance:",
+        f"{minimum_red_clearance:.3f}m"
+    )
+    print("Maximum tilt:", f"{maximum_turn_tilt:.2f}deg")
+    print("CSV:", turn_csv)
+    print(
+        "REPLANNED_TURN:",
+        "PASS" if passed else "FAIL"
+    )
+
+print("Simulation only; not hardware-safe.")

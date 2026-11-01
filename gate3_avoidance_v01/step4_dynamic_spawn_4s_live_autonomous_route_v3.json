@@ -1,0 +1,15 @@
+{
+  "step": 3,
+  "status": "TRAJECTORY_OR_GUARD_FAIL",
+  "pass": false,
+  "depth_source": "current simulation observation",
+  "goal": [
+    -1.1,
+    1.5
+  ],
+  "final_xy": [
+    -0.1680702175525575,
+    0.5675934729664808
+  ],
+  "trace_samples": 8908
+}

@@ -1,0 +1,9 @@
+{
+  "case": "x_plus_05",
+  "correction_limit": 6,
+  "returncode": 0,
+  "status": "PASS",
+  "reported_pass": true,
+  "experimental_pass": true,
+  "not_full_step4_acceptance": true
+}

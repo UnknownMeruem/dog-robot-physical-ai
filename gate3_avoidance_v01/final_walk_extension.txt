@@ -1,0 +1,188 @@
+# ===== Final guarded walk =====
+print("\n=== Final Replanned Walk ===")
+
+final_goal = np.array([-1.10, 1.50])
+final_rows = []
+final_reason = "NOT_STARTED"
+final_contacts = 0
+final_max_tilt = 0.0
+final_min_height = float("inf")
+final_min_extra = float("inf")
+final_min_red = float("inf")
+final_depth_count = 0
+final_stage = "not_started"
+
+if not globals().get("passed", False):
+    print("FINAL_WALK_NOT_STARTED: turn acceptance failed")
+else:
+    start_xy = data.qpos[:2].copy()
+    start_yaw = yaw_deg()
+    heading = math.radians(start_yaw)
+    direction = np.array([-math.cos(heading), -math.sin(heading)])
+    walk_goal = final_goal
+
+    # The successful preceding waypoint walk already loaded
+    # the depth detector into detect_depth.
+    if "detect_depth" not in globals():
+        raise RuntimeError("Depth detector is not available")
+
+    renderer_final = mujoco.Renderer(
+        model, width=640, height=360
+    )
+    try:
+        stage = "walk"
+        stage_start = float(data.time)
+        beginning = float(data.time)
+        last_depth = -1e9
+        nearest = float("nan")
+
+        print("Start XY:", np.round(start_xy, 4))
+        print("Goal XY:", final_goal)
+        print("Start yaw:", f"{start_yaw:+.2f}deg")
+
+        while float(data.time) - beginning < 27.0:
+            t = float(data.time)
+            elapsed = t - stage_start
+            position = data.qpos[:2].copy()
+
+            displacement = position - start_xy
+            forward = float(np.dot(displacement, direction))
+            lateral = abs(float(
+                direction[0] * displacement[1]
+                - direction[1] * displacement[0]
+            ))
+            goal_error = float(np.linalg.norm(position - final_goal))
+            extra_clear = xy_clearance(extra_id)
+            red_clear = xy_clearance(box_id)
+            height, tilt = posture()
+
+            final_min_extra = min(final_min_extra, extra_clear)
+            final_min_red = min(final_min_red, red_clear)
+            final_max_tilt = max(final_max_tilt, tilt)
+            final_min_height = min(final_min_height, height)
+
+            for i in range(data.ncon):
+                contact = data.contact[i]
+                pair = (int(contact.geom1), int(contact.geom2))
+                if extra_id in pair or box_id in pair:
+                    final_contacts += 1
+
+            if stage == "walk":
+                if t - last_depth >= 0.40:
+                    last_depth = t
+                    try:
+                        nearest = float(detect_depth(renderer_final))
+                    except Exception as exc:
+                        print("Depth exception:", repr(exc))
+                        nearest = float("nan")
+
+                    final_depth_count += 1
+                    print(
+                        f"Depth t={t:.2f}s "
+                        f"nearest={nearest:.3f}m"
+                    )
+
+                yaw_error = (yaw_deg() - start_yaw + 180) % 360 - 180
+
+                if not math.isfinite(nearest):
+                    final_reason = "DEPTH_SENSOR_STOP"
+                elif nearest < 0.55:
+                    final_reason = "DEPTH_OBSTACLE_STOP"
+                elif final_contacts > 0:
+                    final_reason = "CONTACT_STOP"
+                elif min(extra_clear, red_clear) < 0.441:
+                    final_reason = "CLEARANCE_STOP"
+                elif height < 0.16 or tilt > 12.0:
+                    final_reason = "POSTURE_STOP"
+                elif lateral > 0.08:
+                    final_reason = "PATH_DEVIATION_STOP"
+                elif abs(yaw_error) > 10.0:
+                    final_reason = "HEADING_STOP"
+                elif goal_error <= 0.11:
+                    final_reason = "FINAL_GOAL_REACHED"
+                elif forward >= 0.95:
+                    final_reason = "DISTANCE_LIMIT_STOP"
+                elif t - beginning >= 22.0:
+                    final_reason = "WALK_TIMEOUT"
+
+                if final_reason != "NOT_STARTED":
+                    stage = "stopping"
+                    stage_start = t
+                    print(
+                        f"Final walk stop: distance={forward:.3f}m "
+                        f"goal_error={goal_error:.3f}m "
+                        f"reason={final_reason}"
+                    )
+
+            elif stage == "stopping" and elapsed >= 1.0:
+                stage = "hold"
+                stage_start = t
+
+            elif stage == "hold" and elapsed >= 1.0:
+                break
+
+            set_legs(stage, t - stage_start)
+            mujoco.mj_step(model, data)
+
+            final_rows.append({
+                "time_s": float(data.time),
+                "stage": stage,
+                "x_m": float(data.qpos[0]),
+                "y_m": float(data.qpos[1]),
+                "yaw_deg": yaw_deg(),
+                "height_m": float(data.qpos[2]),
+                "tilt_deg": tilt,
+                "extra_clearance_m": xy_clearance(extra_id),
+                "red_clearance_m": xy_clearance(box_id),
+                "contact_samples": final_contacts,
+                "depth_m": nearest,
+            })
+
+        final_stage = stage
+        if final_reason == "NOT_STARTED":
+            final_reason = "GLOBAL_TIMEOUT"
+    finally:
+        renderer_final.close()
+
+    if final_rows:
+        csv_final = HERE / "final_replanned_walk.csv"
+        with csv_final.open("w", newline="") as f:
+            writer = csv.DictWriter(
+                f, fieldnames=list(final_rows[0])
+            )
+            writer.writeheader()
+            writer.writerows(final_rows)
+
+    final_error = float(np.linalg.norm(
+        data.qpos[:2] - final_goal
+    ))
+
+    final_pass = (
+        final_reason == "FINAL_GOAL_REACHED"
+        and final_stage == "hold"
+        and final_error <= 0.15
+        and final_contacts == 0
+        and final_min_extra >= 0.441
+        and final_min_red >= 0.441
+        and final_min_height >= 0.16
+        and final_max_tilt <= 12.0
+    )
+
+    print("\n=== Final Replanned Walk Result ===")
+    print("Final XY:", np.round(data.qpos[:2], 4))
+    print("Final goal error:", f"{final_error:.3f}m")
+    print("Final stage:", final_stage)
+    print("Stop reason:", final_reason)
+    print("Depth samples:", final_depth_count)
+    print("Contact samples:", final_contacts)
+    print("Minimum extra-box clearance:",
+          f"{final_min_extra:.3f}m")
+    print("Minimum red-box clearance:",
+          f"{final_min_red:.3f}m")
+    print("Maximum tilt:", f"{final_max_tilt:.2f}deg")
+    print(
+        "FINAL_REPLANNED_WALK:",
+        "PASS" if final_pass else "FAIL"
+    )
+
+print("Simulation only; not hardware-safe.")

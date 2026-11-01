@@ -1,0 +1,36 @@
+{
+  "controller_source": "../gate3_avoidance_v01/test_step4_final_case_02.py",
+  "planner_source": "../gate3_avoidance_v01/test_dynamic_replan_diverse.py",
+  "valid_2d_candidate_count": 50,
+  "distinct_route_signatures": 6,
+  "controller_functions": {
+    "guard": {
+      "line_start": 1028,
+      "line_end": 1055
+    },
+    "turn_to": {
+      "line_start": 1097,
+      "line_end": 1146
+    },
+    "walk_to": {
+      "line_start": 1148,
+      "line_end": 1234
+    }
+  },
+  "integration_requirements": [
+    "Maintain separate live obstacle occupancy regions",
+    "Detect a new obstacle while robot is moving",
+    "Stop robot and verify actual pose and clearance",
+    "Acquire fresh depth from the stopped pose",
+    "Replan from the current robot pose",
+    "Preflight-check turn sweep and proposed walk",
+    "Resume only when both route and guard permit",
+    "Record contact, posture, and all replan attempts",
+    "Fail closed for unavailable or invalid camera data"
+  ],
+  "runtime_clearance_m": 0.521,
+  "planning_clearance_m": 0.551,
+  "runtime_dynamic_integration_pass": false,
+  "step4_complete": false,
+  "source_excerpt": "../gate3_avoidance_v01/step4_multi_obstacle_results/mujoco_integration_source.txt"
+}

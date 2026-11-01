@@ -1,0 +1,230 @@
+[
+  {
+    "case": "case_00",
+    "seed": 20261102,
+    "dx_m": -0.08,
+    "dy_m": -0.08,
+    "goal_clearance_m": 0.6551762108626684,
+    "expected": "PASS",
+    "actual": "PASS",
+    "pass": true,
+    "return_code": 0,
+    "observed_points": 572,
+    "goal_error_m": 0.11678983572068613,
+    "audit": {
+      "rows": 12849,
+      "min_estimated": 0.6417927281355322,
+      "min_extra": 0.653733151034096,
+      "min_red": 0.5679905054586715,
+      "min_height": 0.2100055372998199,
+      "max_tilt": 3.686337743613857,
+      "guard_events": 0
+    },
+    "log": "/home/kato/physical_ai_todai/dog_robot/gate3_avoidance_v01/step4_randomized_audit/case_00.log"
+  },
+  {
+    "case": "case_01",
+    "seed": 20261102,
+    "dx_m": -0.08,
+    "dy_m": 0.08,
+    "goal_clearance_m": 0.497971747305626,
+    "expected": "GOAL_UNSAFE_REJECTED",
+    "actual": "GOAL_UNSAFE_REJECTED",
+    "pass": true,
+    "return_code": 0,
+    "observed_points": 492,
+    "goal_error_m": 1.3879045109901536,
+    "audit": {
+      "rows": 0
+    },
+    "log": "/home/kato/physical_ai_todai/dog_robot/gate3_avoidance_v01/step4_randomized_audit/case_01.log"
+  },
+  {
+    "case": "case_02",
+    "seed": 20261102,
+    "dx_m": 0.08,
+    "dy_m": -0.08,
+    "goal_clearance_m": 0.6534641415093615,
+    "expected": "PASS",
+    "actual": "TRAJECTORY_OR_GUARD_FAIL",
+    "pass": false,
+    "return_code": 0,
+    "observed_points": 1146,
+    "goal_error_m": 1.366192243454401,
+    "audit": {
+      "rows": 2763,
+      "min_estimated": 0.5207239719752612,
+      "min_extra": 0.5486027969414582,
+      "min_red": 0.5532486208562825,
+      "min_height": 0.21032954424739797,
+      "max_tilt": 3.686337743613857,
+      "guard_events": 8
+    },
+    "log": "/home/kato/physical_ai_todai/dog_robot/gate3_avoidance_v01/step4_randomized_audit/case_02.log"
+  },
+  {
+    "case": "case_03",
+    "seed": 20261102,
+    "dx_m": 0.08,
+    "dy_m": 0.08,
+    "goal_clearance_m": 0.49221087298190674,
+    "expected": "GOAL_UNSAFE_REJECTED",
+    "actual": "GOAL_UNSAFE_REJECTED",
+    "pass": true,
+    "return_code": 0,
+    "observed_points": 893,
+    "goal_error_m": 1.3879045109901536,
+    "audit": {
+      "rows": 0
+    },
+    "log": "/home/kato/physical_ai_todai/dog_robot/gate3_avoidance_v01/step4_randomized_audit/case_03.log"
+  },
+  {
+    "case": "case_04",
+    "seed": 20261102,
+    "dx_m": 0.0133,
+    "dy_m": 0.097,
+    "goal_clearance_m": 0.47893798287101186,
+    "expected": "GOAL_UNSAFE_REJECTED",
+    "actual": "GOAL_UNSAFE_REJECTED",
+    "pass": true,
+    "return_code": 0,
+    "observed_points": 677,
+    "goal_error_m": 1.3879045109901536,
+    "audit": {
+      "rows": 0
+    },
+    "log": "/home/kato/physical_ai_todai/dog_robot/gate3_avoidance_v01/step4_randomized_audit/case_04.log"
+  },
+  {
+    "case": "case_05",
+    "seed": 20261102,
+    "dx_m": -0.0246,
+    "dy_m": 0.0282,
+    "goal_clearance_m": 0.5458806200349187,
+    "expected": "GOAL_UNSAFE_REJECTED",
+    "actual": "GOAL_UNSAFE_REJECTED",
+    "pass": true,
+    "return_code": 0,
+    "observed_points": 622,
+    "goal_error_m": 1.3879045109901536,
+    "audit": {
+      "rows": 0
+    },
+    "log": "/home/kato/physical_ai_todai/dog_robot/gate3_avoidance_v01/step4_randomized_audit/case_05.log"
+  },
+  {
+    "case": "case_06",
+    "seed": 20261102,
+    "dx_m": -0.0757,
+    "dy_m": -0.0911,
+    "goal_clearance_m": 0.6650638089365011,
+    "expected": "PASS",
+    "actual": "PASS",
+    "pass": true,
+    "return_code": 0,
+    "observed_points": 583,
+    "goal_error_m": 0.10953247257915329,
+    "audit": {
+      "rows": 14033,
+      "min_estimated": 0.6610737525078905,
+      "min_extra": 0.6731997283284558,
+      "min_red": 0.5633380645615812,
+      "min_height": 0.21000491975101376,
+      "max_tilt": 3.686337743613857,
+      "guard_events": 0
+    },
+    "log": "/home/kato/physical_ai_todai/dog_robot/gate3_avoidance_v01/step4_randomized_audit/case_06.log"
+  },
+  {
+    "case": "case_07",
+    "seed": 20261102,
+    "dx_m": 0.0678,
+    "dy_m": -0.0594,
+    "goal_clearance_m": 0.6343514574926158,
+    "expected": "PASS",
+    "actual": "TRAJECTORY_OR_GUARD_FAIL",
+    "pass": false,
+    "return_code": 0,
+    "observed_points": 1036,
+    "goal_error_m": 1.3625774458550814,
+    "audit": {
+      "rows": 3738,
+      "min_estimated": 0.5289829359529374,
+      "min_extra": 0.5581529084725168,
+      "min_red": 0.5358775875191862,
+      "min_height": 0.21032954424739797,
+      "max_tilt": 3.686337743613857,
+      "guard_events": 0
+    },
+    "log": "/home/kato/physical_ai_todai/dog_robot/gate3_avoidance_v01/step4_randomized_audit/case_07.log"
+  },
+  {
+    "case": "case_08",
+    "seed": 20261102,
+    "dx_m": 0.0873,
+    "dy_m": 0.0991,
+    "goal_clearance_m": 0.4797893846043669,
+    "expected": "GOAL_UNSAFE_REJECTED",
+    "actual": "GOAL_UNSAFE_REJECTED",
+    "pass": true,
+    "return_code": 0,
+    "observed_points": 885,
+    "goal_error_m": 1.3879045109901536,
+    "audit": {
+      "rows": 0
+    },
+    "log": "/home/kato/physical_ai_todai/dog_robot/gate3_avoidance_v01/step4_randomized_audit/case_08.log"
+  },
+  {
+    "case": "case_09",
+    "seed": 20261102,
+    "dx_m": 0.0234,
+    "dy_m": 0.0955,
+    "goal_clearance_m": 0.47891876012558754,
+    "expected": "GOAL_UNSAFE_REJECTED",
+    "actual": "GOAL_UNSAFE_REJECTED",
+    "pass": true,
+    "return_code": 0,
+    "observed_points": 691,
+    "goal_error_m": 1.3879045109901536,
+    "audit": {
+      "rows": 0
+    },
+    "log": "/home/kato/physical_ai_todai/dog_robot/gate3_avoidance_v01/step4_randomized_audit/case_09.log"
+  },
+  {
+    "case": "case_10",
+    "seed": 20261102,
+    "dx_m": 0.0591,
+    "dy_m": 0.0798,
+    "goal_clearance_m": 0.4987156257437617,
+    "expected": "GOAL_UNSAFE_REJECTED",
+    "actual": "GOAL_UNSAFE_REJECTED",
+    "pass": true,
+    "return_code": 0,
+    "observed_points": 796,
+    "goal_error_m": 1.3879045109901536,
+    "audit": {
+      "rows": 0
+    },
+    "log": "/home/kato/physical_ai_todai/dog_robot/gate3_avoidance_v01/step4_randomized_audit/case_10.log"
+  },
+  {
+    "case": "case_11",
+    "seed": 20261102,
+    "dx_m": 0.0197,
+    "dy_m": 0.0407,
+    "goal_clearance_m": 0.5296984766809021,
+    "expected": "GOAL_UNSAFE_REJECTED",
+    "actual": "GOAL_UNSAFE_REJECTED",
+    "pass": true,
+    "return_code": 0,
+    "observed_points": 753,
+    "goal_error_m": 1.3879045109901536,
+    "audit": {
+      "rows": 0
+    },
+    "log": "/home/kato/physical_ai_todai/dog_robot/gate3_avoidance_v01/step4_randomized_audit/case_11.log"
+  }
+]

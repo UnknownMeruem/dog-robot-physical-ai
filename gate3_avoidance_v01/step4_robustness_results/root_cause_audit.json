@@ -1,0 +1,176 @@
+[
+  {
+    "case": "x_minus_05",
+    "status": "PASS",
+    "classification": "REACHED_GOAL",
+    "goal_clearance_m": 0.5720008610286307,
+    "runtime_goal_reserve_m": 0.05100086102863066,
+    "planning_goal_reserve_m": 0.021000861028630635,
+    "live_candidate_count": 629,
+    "observed_points": 585,
+    "trace_samples": 12203,
+    "minima": {
+      "estimated": 0.5641608253227018,
+      "extra": 0.5799831413480963,
+      "red": 0.5696553503074907,
+      "height": 0.21000525651758312,
+      "tilt": 0.0010747409685555335
+    },
+    "first_guard_event": null,
+    "events": [
+      "LIVE_REPLAN: STATIC_CANDIDATE",
+      "LIVE_TURN1: turn command=-52.45deg",
+      "LIVE_TURN1: TURN_REACHED, yaw_error=0.37deg",
+      "POST_TURN_CANDIDATES: 506 iteration: 0",
+      "LIVE_CORRECTIVE_TURN: turn command=-4.65deg",
+      "LIVE_CORRECTIVE_TURN: TURN_REACHED, yaw_error=0.33deg",
+      "POST_TURN_CANDIDATES: 506 iteration: 1",
+      "POST_TURN_PREDICTED_CLEARANCE: 0.571m",
+      "Live waypoint walk: GOAL_TRIGGERED",
+      "LIVE_FINAL_TURN: turn command=+73.53deg",
+      "LIVE_FINAL_TURN: TURN_REACHED, yaw_error=0.26deg",
+      "Live final walk: GOAL_TRIGGERED",
+      "GATE3_STEP3: PASS"
+    ]
+  },
+  {
+    "case": "x_plus_05",
+    "status": "TRAJECTORY_OR_GUARD_FAIL",
+    "classification": "DYNAMIC_CONTROL_OR_GUARD_FAILURE",
+    "goal_clearance_m": 0.5725891880681162,
+    "runtime_goal_reserve_m": 0.05158918806811619,
+    "planning_goal_reserve_m": 0.02158918806811616,
+    "live_candidate_count": 505,
+    "observed_points": 884,
+    "trace_samples": 4599,
+    "minima": {
+      "estimated": 0.5800704240570242,
+      "extra": 0.6124008252278019,
+      "red": 0.5444300223631543,
+      "height": 0.21032954424739797,
+      "tilt": 0.0007112411053686438
+    },
+    "first_guard_event": null,
+    "events": [
+      "LIVE_REPLAN: STATIC_CANDIDATE",
+      "LIVE_TURN1: turn command=-62.94deg",
+      "LIVE_TURN1: TURN_REACHED, yaw_error=1.38deg",
+      "POST_TURN_CANDIDATES: 373 iteration: 0",
+      "LIVE_CORRECTIVE_TURN: turn command=-14.55deg",
+      "LIVE_CORRECTIVE_TURN: TURN_REACHED, yaw_error=0.68deg",
+      "POST_TURN_CANDIDATES: 347 iteration: 1",
+      "LIVE_CORRECTIVE_TURN: turn command=-3.75deg",
+      "LIVE_CORRECTIVE_TURN: TURN_REACHED, yaw_error=0.77deg",
+      "POST_TURN_CANDIDATES: 341 iteration: 2",
+      "LIVE_CORRECTIVE_TURN: turn command=-3.28deg",
+      "LIVE_CORRECTIVE_TURN: TURN_REACHED, yaw_error=0.65deg",
+      "GATE3_STEP3: FAIL"
+    ]
+  },
+  {
+    "case": "y_minus_05",
+    "status": "PASS",
+    "classification": "REACHED_GOAL",
+    "goal_clearance_m": 0.6267057616200515,
+    "runtime_goal_reserve_m": 0.10570576162005152,
+    "planning_goal_reserve_m": 0.07570576162005149,
+    "live_candidate_count": 667,
+    "observed_points": 748,
+    "trace_samples": 16291,
+    "minima": {
+      "estimated": 0.5989941636397647,
+      "extra": 0.627510798787791,
+      "red": 0.5348731294922924,
+      "height": 0.21000546092584674,
+      "tilt": 0.0010747409685555335
+    },
+    "first_guard_event": null,
+    "events": [
+      "LIVE_REPLAN: STATIC_CANDIDATE",
+      "LIVE_TURN1: turn command=-62.94deg",
+      "LIVE_TURN1: TURN_REACHED, yaw_error=1.38deg",
+      "POST_TURN_CANDIDATES: 551 iteration: 0",
+      "LIVE_CORRECTIVE_TURN: turn command=-24.12deg",
+      "LIVE_CORRECTIVE_TURN: TURN_REACHED, yaw_error=0.89deg",
+      "POST_TURN_CANDIDATES: 532 iteration: 1",
+      "LIVE_CORRECTIVE_TURN: turn command=-3.75deg",
+      "LIVE_CORRECTIVE_TURN: TURN_REACHED, yaw_error=0.74deg",
+      "POST_TURN_CANDIDATES: 532 iteration: 2",
+      "POST_TURN_PREDICTED_CLEARANCE: 0.603m",
+      "Live waypoint walk: GOAL_TRIGGERED",
+      "LIVE_FINAL_TURN: turn command=+103.96deg",
+      "LIVE_FINAL_TURN: TURN_REACHED, yaw_error=0.27deg",
+      "Live final walk: GOAL_TRIGGERED",
+      "GATE3_STEP3: PASS"
+    ]
+  },
+  {
+    "case": "y_plus_05",
+    "status": "NO_ROBUST_ROUTE",
+    "classification": "GOAL_PLANNING_MARGIN_INSUFFICIENT",
+    "goal_clearance_m": 0.5212393764444205,
+    "runtime_goal_reserve_m": 0.00023937644442051376,
+    "planning_goal_reserve_m": -0.029760623555579513,
+    "live_candidate_count": 454,
+    "observed_points": 669,
+    "trace_samples": 0,
+    "minima": {
+      "estimated": null,
+      "extra": null,
+      "red": null,
+      "height": null,
+      "tilt": null
+    },
+    "first_guard_event": null,
+    "events": [
+      "LIVE_REPLAN: STATIC_CANDIDATE",
+      "GATE3_STEP3: FAIL"
+    ]
+  },
+  {
+    "case": "xy_shift",
+    "status": "NO_ROBUST_ROUTE",
+    "classification": "GOAL_PLANNING_MARGIN_INSUFFICIENT",
+    "goal_clearance_m": 0.5210020254394638,
+    "runtime_goal_reserve_m": 2.0254394638152817e-06,
+    "planning_goal_reserve_m": -0.02999797456053621,
+    "live_candidate_count": 414,
+    "observed_points": 811,
+    "trace_samples": 0,
+    "minima": {
+      "estimated": null,
+      "extra": null,
+      "red": null,
+      "height": null,
+      "tilt": null
+    },
+    "first_guard_event": null,
+    "events": [
+      "LIVE_REPLAN: STATIC_CANDIDATE",
+      "GATE3_STEP3: FAIL"
+    ]
+  },
+  {
+    "case": "nan_map_fault",
+    "status": "GOAL_MAP_INVALID_REJECTED",
+    "classification": "INVALID_MAP_REJECTED",
+    "goal_clearance_m": 0.5719999878220181,
+    "runtime_goal_reserve_m": 0.05099998782201809,
+    "planning_goal_reserve_m": 0.020999987822018062,
+    "live_candidate_count": 565,
+    "observed_points": 702,
+    "trace_samples": 0,
+    "minima": {
+      "estimated": null,
+      "extra": null,
+      "red": null,
+      "height": null,
+      "tilt": null
+    },
+    "first_guard_event": null,
+    "events": [
+      "LIVE_REPLAN: STATIC_CANDIDATE",
+      "GATE3_STEP3: FAIL"
+    ]
+  }
+]

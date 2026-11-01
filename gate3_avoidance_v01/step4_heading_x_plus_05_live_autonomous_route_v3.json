@@ -1,0 +1,15 @@
+{
+  "step": 3,
+  "status": "PASS",
+  "pass": true,
+  "depth_source": "current simulation observation",
+  "goal": [
+    -1.1,
+    1.5
+  ],
+  "final_xy": [
+    -1.0025022611787315,
+    1.552267340228134
+  ],
+  "trace_samples": 16362
+}

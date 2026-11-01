@@ -1,0 +1,185 @@
+# ===== Live depth observation and replanning test =====
+print("\n=== LIVE DEPTH REPLANNING TEST ===")
+
+import json
+from pathlib import Path
+
+out_dir = Path("../gate3_avoidance_v01")
+live_report = {"test": "LIVE_DEPTH_REPLANNING"}
+
+if globals().get("stop_reason") != "DEPTH_OBSTACLE_STOP":
+    print("LIVE_REPLAN: NOT_STARTED")
+    live_report["status"] = "NO_DEPTH_STOP"
+else:
+    camera_id = mujoco.mj_name2id(
+        model, mujoco.mjtObj.mjOBJ_CAMERA, "dog_eye"
+    )
+    torso_id = mujoco.mj_name2id(
+        model, mujoco.mjtObj.mjOBJ_BODY, "torso"
+    )
+    if camera_id < 0 or torso_id < 0:
+        raise RuntimeError("Camera or torso not found")
+
+    with mujoco.Renderer(
+        model, width=640, height=360
+    ) as renderer:
+        renderer.enable_depth_rendering()
+        renderer.update_scene(data, camera="dog_eye")
+        depth = renderer.render().copy()
+        renderer.disable_depth_rendering()
+
+    h, w = depth.shape
+    vv, uu = np.mgrid[0:h:4, 0:w:4]
+    dd = depth[::4, ::4]
+    valid = np.isfinite(dd) & (dd > 0.01) & (dd < 10)
+
+    if not np.any(valid):
+        print("LIVE_REPLAN: SENSOR_INVALID")
+        live_report["status"] = "SENSOR_INVALID"
+    else:
+        focal = h / (
+            2 * math.tan(
+                math.radians(
+                    float(model.cam_fovy[camera_id])
+                ) / 2
+            )
+        )
+        d = dd[valid]
+        u, v = uu[valid], vv[valid]
+
+        camera_pts = np.column_stack((
+            (u + 0.5 - w/2)*d/focal,
+            -(v + 0.5 - h/2)*d/focal,
+            -d
+        ))
+
+        cam_rot = data.cam_xmat[camera_id].reshape(3,3)
+        world = (
+            camera_pts @ cam_rot.T
+            + data.cam_xpos[camera_id]
+        )
+        torso_rot = data.xmat[torso_id].reshape(3,3)
+        body = (
+            world - data.xpos[torso_id]
+        ) @ torso_rot
+
+        forward = -body[:,0]
+        lateral = body[:,1]
+        height = world[:,2]
+
+        candidate = (
+            (height >= 0.06)
+            & (height <= 0.45)
+            & (forward > 0)
+            & (forward < 1.10)
+            & (np.abs(lateral) < 0.25)
+        )
+
+        print("Valid depth pixels:", int(valid.sum()))
+        print("Obstacle points:", int(candidate.sum()))
+
+        if candidate.sum() < 30:
+            print("LIVE_REPLAN: INSUFFICIENT_POINTS")
+            live_report["status"] = "INSUFFICIENT_POINTS"
+        else:
+            near = float(forward[candidate].min())
+            selected = candidate & (forward <= near + 0.15)
+            points = world[selected]
+
+            np.savetxt(
+                out_dir / "live_obstacle_points.csv",
+                points,
+                delimiter=",",
+                header="world_x,world_y,world_z",
+                comments=""
+            )
+
+            # Trial uncertainty bounds. Not a certified
+            # model of unseen obstacle surfaces.
+            low = points[:,:2].min(axis=0) - [0.15,0.05]
+            high = points[:,:2].max(axis=0) + [0.01,0.05]
+
+            start = data.qpos[:2].copy()
+            goal = np.array([-1.10,1.50])
+            clearance_required = 0.521
+
+            def clearance(xy):
+                delta = np.maximum(
+                    np.maximum(low-xy,xy-high),0
+                )
+                return np.linalg.norm(delta,axis=-1)
+
+            def segment(a,b):
+                n = max(
+                    2,
+                    int(np.ceil(np.linalg.norm(b-a)/0.005))+1
+                )
+                t = np.linspace(0,1,n)[:,None]
+                return a + t*(b-a)
+
+            candidates = []
+            for y in np.arange(1.25,1.86,0.05):
+                for x in np.arange(-0.45,0.21,0.05):
+                    via = np.array([x,y])
+                    path = np.vstack((
+                        segment(start,via),
+                        segment(via,goal)
+                    ))
+                    margin = float(clearance(path).min())
+                    if margin >= clearance_required:
+                        length = (
+                            np.linalg.norm(start-via)
+                            + np.linalg.norm(via-goal)
+                        )
+                        candidates.append(
+                            (length,margin,via)
+                        )
+
+            start_clear = float(clearance(start))
+            live_report.update({
+                "status": "PLANNED" if candidates
+                          else "NO_STATIC_ROUTE",
+                "start_xy": start.tolist(),
+                "depth_nearest_m": near,
+                "observed_points": int(len(points)),
+                "estimated_box_min": low.tolist(),
+                "estimated_box_max": high.tolist(),
+                "start_clearance_m": start_clear,
+                "required_clearance_m": clearance_required,
+                "candidate_count": len(candidates),
+            })
+
+            print("Robot XY:", np.round(start,4))
+            print("Nearest depth:", f"{near:.3f}m")
+            print("Estimated box min:", np.round(low,4))
+            print("Estimated box max:", np.round(high,4))
+            print("Start clearance:", f"{start_clear:.3f}m")
+            print("Static route candidates:",len(candidates))
+
+            if candidates:
+                length,minimum,via = min(
+                    candidates,key=lambda x:x[0]
+                )
+                live_report.update({
+                    "waypoint": via.tolist(),
+                    "route_clearance_m": minimum,
+                    "route_length_m": length,
+                })
+                print("Generated waypoint:",np.round(via,4))
+                print("Route clearance:",f"{minimum:.3f}m")
+
+            if start_clear < clearance_required:
+                print("LIVE_REPLAN: START_TOO_CLOSE")
+                live_report["status"] = "START_TOO_CLOSE"
+            elif not candidates:
+                print("LIVE_REPLAN: NO_STATIC_ROUTE")
+            else:
+                print("LIVE_REPLAN: STATIC_CANDIDATE")
+
+report_path = out_dir / "live_replan_result.json"
+report_path.write_text(
+    json.dumps(live_report,indent=2)
+)
+print("Report:",report_path)
+print("No new walking commands were issued.")
+print("Simulation only; not hardware-safe.")

@@ -1,0 +1,19 @@
+{
+  "exit_code": 0,
+  "appeared_during_walk": false,
+  "depth_stop": false,
+  "clearance_stop": false,
+  "contact_stop": false,
+  "trace_rows": 0,
+  "guard_events": 0,
+  "min_estimated_m": null,
+  "min_known_obstacle_m": null,
+  "min_red_m": null,
+  "min_height_m": null,
+  "reported_controller_status": "GOAL_MAP_INVALID_REJECTED",
+  "dynamic_stop_observed": false,
+  "safe_stop_preliminary": false,
+  "reobservation_after_stop_pass": false,
+  "dynamic_replan_and_resume_pass": false,
+  "full_body_safety_certified": false
+}

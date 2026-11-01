@@ -1,0 +1,27 @@
+{
+  "test": "LIVE_DEPTH_REPLANNING",
+  "status": "PLANNED",
+  "start_xy": [
+    -0.1721004692131468,
+    0.3330895953733846
+  ],
+  "depth_nearest_m": 0.8238232399165198,
+  "observed_points": 461,
+  "estimated_box_min": [
+    -1.2556688991882314,
+    0.578899861099762
+  ],
+  "estimated_box_max": [
+    -0.9356998836040391,
+    0.8322743025730459
+  ],
+  "start_clearance_m": 0.8021887261702111,
+  "required_clearance_m": 0.521,
+  "candidate_count": 805,
+  "waypoint": [
+    -0.49999999999999967,
+    1.2000000000000002
+  ],
+  "route_clearance_m": 0.5237573514180859,
+  "route_length_m": 1.5976708407009381
+}

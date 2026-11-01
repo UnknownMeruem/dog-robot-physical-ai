@@ -1,0 +1,514 @@
+0293                 f"cross_track={cross_track:.3f}m "
+0294                 f"reason={stop_reason}"
+0295             )
+0296 
+0297     set_legs(stage, t - stage_start)
+0298     mujoco.mj_step(model, data)
+0299 
+0300     for i in range(data.ncon):
+0301         contact = data.contact[i]
+0302         if (
+0303             int(contact.geom1) == box_id
+0304             or int(contact.geom2) == box_id
+0305         ):
+0306             box_contacts += 1
+0307             if float(contact.dist) <= 0.0:
+0308                 box_penetrations += 1
+0309 
+0310             if stage not in ("stopping", "hold"):
+
+==========
+
+0424     compile(_depth_module, str(_depth_source), "exec"),
+0425     _depth_namespace
+0426 )
+0427 _depth_distance = _depth_namespace["obstacle_distance"]
+0428 
+0429 _depth_renderer = mujoco.Renderer(
+0430     model, width=640, height=360
+0431 )
+0432 _depth_last_time = -1e9
+0433 _depth_latest = float("nan")
+0434 _depth_samples = []
+0435 _depth_limit = 0.85
+0436 
+0437 print("Depth camera guard enabled")
+0438 print("Depth stop threshold: 0.85m")
+0439 print("Depth sample interval: 0.40s")
+0440 
+0441 reason2 = "NOT_STARTED"
+
+==========
+
+0544 
+0545         elif stage == "hold" and elapsed >= 1.0:
+0546             break
+0547 
+0548         set_legs(stage, t - stage_start)
+0549         mujoco.mj_step(model, data)
+0550         inspect_step()
+0551 
+0552     print("Yaw after turn:", f"{yaw_deg():+.2f}deg")
+0553 
+0554     if reason2 == "TURN2_REACHED" and contact2 == 0:
+0555         stage = "walk"
+0556         stage_start = float(data.time)
+0557         walk2_start_time = float(data.time)
+0558         walk2_start_xy = data.qpos[:2].copy()
+0559         heading = math.radians(yaw_deg())
+0560         walk2_dir = np.array([
+0561             -math.cos(heading), -math.sin(heading)
+
+==========
+
+0595                 if not math.isfinite(_depth_latest):
+0596                     depth_stop2 = True
+0597                     depth_reason2 = "DEPTH_SENSOR_STOP"
+0598                 elif _depth_latest < _depth_limit:
+0599                     depth_stop2 = True
+0600                     depth_reason2 = "DEPTH_OBSTACLE_STOP"
+0601 
+0602                 goal_error2 = float(
+0603                     np.linalg.norm(data.qpos[:2] - waypoint2)
+0604                 )
+0605                 box_xy = data.geom_xpos[box_id, :2].copy()
+0606                 box_half = model.geom_size[box_id, :2]
+0607                 delta_box = np.maximum(
+0608                     np.abs(data.qpos[:2] - box_xy) - box_half,
+0609                     0.0
+0610                 )
+0611                 box_clearance = float(np.linalg.norm(delta_box))
+0612 
+
+==========
+
+0642 
+0643             elif stage == "hold" and t - stage_start >= 1.0:
+0644                 break
+0645 
+0646             set_legs(stage, t - stage_start)
+0647             mujoco.mj_step(model, data)
+0648             inspect_step()
+0649 
+0650     result2 = HERE / "step4_final_case_02_depth_early_live_v3.csv"
+0651     with result2.open("w", newline="") as f:
+0652         writer = csv.DictWriter(
+0653             f, fieldnames=list(stage2_rows[0])
+0654         )
+0655         writer.writeheader()
+0656         writer.writerows(stage2_rows)
+0657 
+0658     print("\n=== Stage 2 Result ===")
+0659     print("Final XY:", np.round(data.qpos[:2], 4))
+
+==========
+
+0706 _depth_renderer.close()
+0707 print("Depth guard simulation finished.")
+0708 
+0709 print("\n=== New Box Test Acceptance ===")
+0710 new_box_pass = (
+0711     reason2 == "DEPTH_OBSTACLE_STOP"
+0712     and stage == "hold"
+0713     and contact2 == 0
+0714     and max_tilt2 <= 12.0
+0715 )
+0716 print(
+0717     "NEW_BOX_DEPTH_STOP:",
+0718     "PASS" if new_box_pass else "FAIL"
+0719 )
+0720 print("Additional box collision must be audited separately.")
+0721 
+0722 import json
+0723 from pathlib import Path
+
+==========
+
+0728 
+0729 out_dir = Path("../gate3_avoidance_v01")
+0730 live_report = {"test": "LIVE_DEPTH_REPLANNING"}
+0731 
+0732 if not (
+0733     globals().get("reason2") == "DEPTH_OBSTACLE_STOP"
+0734     and stage == "hold"
+0735 ):
+0736     print("LIVE_REPLAN: NOT_STARTED")
+0737     live_report["status"] = "NO_DEPTH_STOP"
+0738 else:
+0739     camera_id = mujoco.mj_name2id(
+0740         model, mujoco.mjtObj.mjOBJ_CAMERA, "dog_eye"
+0741     )
+0742     torso_id = mujoco.mj_name2id(
+0743         model, mujoco.mjtObj.mjOBJ_BODY, "torso"
+0744     )
+0745     if camera_id < 0 or torso_id < 0:
+0746         raise RuntimeError("Camera or torso not found")
+0747 
+0748     with mujoco.Renderer(
+0749         model, width=640, height=360
+0750     ) as renderer:
+0751         renderer.enable_depth_rendering()
+0752         renderer.update_scene(data, camera="dog_eye")
+0753         depth = renderer.render().copy()
+0754         renderer.disable_depth_rendering()
+0755 
+0756     h, w = depth.shape
+0757     vv, uu = np.mgrid[0:h:4, 0:w:4]
+0758     dd = depth[::4, ::4]
+0759     valid = np.isfinite(dd) & (dd > 0.01) & (dd < 10)
+0760 
+
+==========
+
+0832                 delta = np.maximum(
+0833                     np.maximum(low-xy,xy-high),0
+0834                 )
+0835                 return np.linalg.norm(delta,axis=-1)
+0836 
+0837             def segment(a,b):
+0838                 n = max(
+0839                     2,
+0840                     int(np.ceil(np.linalg.norm(b-a)/0.005))+1
+0841                 )
+0842                 t = np.linspace(0,1,n)[:,None]
+0843                 return a + t*(b-a)
+0844 
+0845             candidates = []
+0846             for y in np.arange(1.00,2.31,0.05):
+0847                 for x in np.arange(-0.85,0.81,0.05):
+0848                     via = np.array([x,y])
+0849                     path = np.vstack((
+
+==========
+
+0925     "NO_STATIC_ROUTE",
+0926     "SENSOR_INVALID",
+0927     "INSUFFICIENT_POINTS",
+0928 )
+0929 step2_pass = (
+0930     globals().get("reason2") == "DEPTH_OBSTACLE_STOP"
+0931     and stage == "hold"
+0932     and has_observation
+0933     and has_plan
+0934     and decision_is_safe
+0935 )
+0936 print("Depth stop:", globals().get("reason2"))
+0937 print("Observation points:",
+0938       live_report.get("observed_points", 0))
+0939 print("Route candidates:",
+0940       live_report.get("candidate_count", 0))
+0941 print("Decision:", status)
+0942 print("GATE3_STEP2:",
+
+==========
+
+0951 required = live_report.get(
+0952     "required_clearance_m", 0.521
+0953 )
+0954 
+0955 accepted = (
+0956     globals().get("reason2") == "DEPTH_OBSTACLE_STOP"
+0957     and stage == "hold"
+0958     and status == "PLANNED"
+0959     and n > 0
+0960     and start_margin >= required
+0961 )
+0962 
+0963 print("Live status:", status)
+0964 print("Candidates:", n)
+0965 print("Start clearance:", start_margin)
+0966 print("Required:", required)
+0967 print(
+0968     "GATE3_STEP2_EARLY:",
+
+==========
+
+0981 required = float(
+0982     live_report.get("required_clearance_m", 0.521)
+0983 )
+0984 
+0985 observed_ok = (
+0986     reason2 == "DEPTH_OBSTACLE_STOP"
+0987     and stage == "hold"
+0988     and observed >= 30
+0989 )
+0990 
+0991 planning_ok = (
+0992     decision == "PLANNED"
+0993     and candidate_count > 0
+0994     and start_clearance >= required
+0995 )
+0996 
+0997 step2_pass = observed_ok and planning_ok
+0998 
+
+==========
+
+1023     return float(np.linalg.norm(offset))
+1024 
+1025 def angle_error(target, current):
+1026     return (target - current + 180) % 360 - 180
+1027 
+1028 def guard():
+1029     est = estimated_clearance()
+1030     extra = xy_clearance(extra_id)
+1031     red = xy_clearance(box_id)
+1032     height, tilt = posture()
+1033 
+1034     collision = False
+1035     for j in range(data.ncon):
+1036         c = data.contact[j]
+1037         if extra_id in (int(c.geom1), int(c.geom2)):
+1038             collision = True
+1039         if box_id in (int(c.geom1), int(c.geom2)):
+1040             collision = True
+
+==========
+
+1087             stage_start = float(data.time)
+1088         elif stage == "hold" and elapsed >= 1.0:
+1089             break
+1090 
+1091         set_legs(stage, float(data.time)-stage_start)
+1092         mujoco.mj_step(model, data)
+1093         record(section, reason, float("nan"))
+1094 
+1095     return stage == "hold"
+1096 
+1097 def turn_to(section, goal):
+1098     global stage, stage_start, target_angle
+1099 
+1100     delta = goal-data.qpos[:2]
+1101     desired = math.degrees(math.atan2(-delta[1],-delta[0]))
+1102     initial = yaw_deg()
+1103     command = angle_error(desired, initial)
+1104 
+1105     print(f"{section}: turn command={command:+.2f}deg")
+1106 
+1107     if guard()[0]:
+1108         return "START_GUARD_STOP"
+1109 
+
+==========
+
+1122         if abs(command)-abs(actual) <= 1.5:
+1123             reason = "TURN_REACHED"
+1124             break
+1125 
+1126         set_legs("turn", float(data.time)-stage_start)
+1127         mujoco.mj_step(model,data)
+1128         failure = record(section, "", float("nan"))
+1129         if failure:
+1130             reason = failure
+1131             break
+1132 
+1133     soft_hold(section, reason)
+1134     final_error = abs(angle_error(desired,yaw_deg()))
+1135 
+1136     if reason == "TURN_REACHED" and final_error > 5.0:
+1137         reason = "TURN_ACCURACY_FAIL"
+1138 
+1139     if guard()[0]:
+
+==========
+
+1143         f"{section}: {reason}, "
+1144         f"yaw_error={final_error:.2f}deg"
+1145     )
+1146     return reason
+1147 
+1148 def walk_to(section, goal, renderer, timeout=28):
+1149     global stage, stage_start
+1150 
+1151     if guard()[0]:
+1152         return "START_GUARD_STOP"
+1153 
+1154     start_xy = data.qpos[:2].copy()
+1155     start_yaw = yaw_deg()
+1156     heading = math.radians(start_yaw)
+1157     direction = np.array([
+1158         -math.cos(heading),-math.sin(heading)
+1159     ])
+1160     initial_goal_distance = float(np.linalg.norm(goal-start_xy))
+
+==========
+
+1191             break
+1192         if not math.isfinite(nearest):
+1193             reason = "DEPTH_SENSOR_STOP"
+1194             break
+1195         if nearest < 0.55:
+1196             reason = "DEPTH_OBSTACLE_STOP"
+1197             break
+1198         if lateral > 0.08:
+1199             reason = "PATH_DEVIATION_STOP"
+1200             break
+1201         if abs(angle_error(start_yaw,yaw_deg())) > 10:
+1202             reason = "HEADING_STOP"
+1203             break
+1204         if error <= (
+1205             FINAL_TOL if section == "FINAL_WALK"
+1206             else WAYPOINT_TOL
+1207         ):
+1208             reason = "GOAL_TRIGGERED"
+1209             break
+1210         if forward > initial_goal_distance+0.10:
+1211             reason = "DISTANCE_LIMIT_STOP"
+1212             break
+1213 
+1214         set_legs("walk",t-stage_start)
+1215         mujoco.mj_step(model,data)
+1216         failure = record(section,"",nearest)
+1217         if failure:
+1218             reason = failure
+1219             break
+1220 
+1221     soft_hold(section,reason)
+1222     final_error = float(np.linalg.norm(goal-data.qpos[:2]))
+1223 
+1224     if reason == "GOAL_TRIGGERED" and final_error > 0.15:
+1225         reason = "FINAL_ACCURACY_FAIL"
+1226     if guard()[0]:
+1227         reason = guard()[0]
+
+==========
+
+1293 print("GOAL_POLICY_UNSAFE:", goal_policy_unsafe)
+1294 
+1295 if (
+1296     goal_policy_unsafe
+1297     or live_report.get("status") != "PLANNED"
+1298     or reason2 != "DEPTH_OBSTACLE_STOP"
+1299     or stage != "hold"
+1300 ):
+1301     stage3_reason = "LIVE_OBSERVATION_NOT_READY"
+1302 else:
+1303     low = np.array(live_report["estimated_box_min"])
+1304     high = np.array(live_report["estimated_box_max"])
+1305     goal = np.array([-1.10, 1.50])
+1306 
+1307     def estimated_clearance():
+1308         xy = data.qpos[:2]
+1309         delta = np.maximum(
+1310             np.maximum(low - xy, xy - high), 0.0
+1311         )
+1312         return float(np.linalg.norm(delta))
+1313 
+1314     def segment(a, b):
+1315         steps = max(
+1316             2,
+1317             int(np.ceil(np.linalg.norm(b-a)/0.005)) + 1
+1318         )
+1319         t = np.linspace(0, 1, steps)[:, None]
+1320         return a + t*(b-a)
+1321 
+1322     def route_clearance(path):
+1323         delta = np.maximum(
+1324             np.maximum(low-path, path-high), 0.0
+1325         )
+1326         return float(np.linalg.norm(delta, axis=1).min())
+1327 
+1328     def route_candidates():
+1329         start = data.qpos[:2].copy()
+1330         current_yaw = yaw_deg()
+1331         choices = []
+1332         for y in np.arange(1.00, 2.31, 0.05):
+1333             for x in np.arange(-0.85, 0.81, 0.05):
+1334                 via = np.array([x, y])
+1335                 path = np.vstack((
+1336                     segment(start, via),
+1337                     segment(via, goal)
+1338                 ))
+1339                 minimum = route_clearance(path)
+1340                 if minimum < PLANNING_CLEARANCE:
+
+==========
+
+1410         )
+1411         detect_depth = namespace["obstacle_distance"]
+1412 
+1413         stage3_reason = "RUNNING"
+1414 
+1415         with mujoco.Renderer(
+1416             model, width=640, height=360
+1417         ) as renderer:
+1418             # First heading adjustment uses actual stop pose.
+1419             turn1 = (
+1420             "PRE_TURN_RESERVE_STOP"
+1421             if (
+1422                 not np.isfinite(estimated_clearance())
+1423                 or estimated_clearance() < CLEARANCE + 0.090
+1424                 or guard()[0]
+1425             )
+1426             else turn_to("LIVE_TURN1", via)
+1427         )
+1428             print("Live turn 1:", turn1)
+1429 
+1430             # Re-evaluate using the actual pose AFTER turning.
+1431             # A turn can translate the robot by several centimeters.
+1432             walk1 = "NOT_STARTED"
+1433             if turn1 in ("TURN_REACHED", "TURN_ALREADY_ALIGNED"):
+1434                 for correction_iteration in range(6):
+1435                     candidates_now = route_candidates()
+1436                     print(
+1437                         "POST_TURN_CANDIDATES:",
+1438                         len(candidates_now),
+
+==========
+
+1529                         walk1 = "POST_TURN_GUARD_STOP"
+1530                     elif predicted_line < PLANNING_CLEARANCE:
+1531                         walk1 = "POST_TURN_ROUTE_REJECTED"
+1532                     else:
+1533                         walk1 = walk_to(
+1534                             "LIVE_WAYPOINT_WALK",
+1535                             via, renderer, timeout=32
+1536                         )
+1537                         print("Live waypoint walk:", walk1)
+1538             else:
+1539                 walk1 = "FIRST_TURN_FAILED"
+1540 
+1541             if walk1 == "GOAL_TRIGGERED":
+1542                 turn2 = turn_to("LIVE_FINAL_TURN", goal)
+1543                 print("Live final turn:", turn2)
+1544             else:
+1545                 turn2 = "NOT_STARTED"
+1546 
+1547             if turn2 in (
+1548                 "TURN_REACHED", "TURN_ALREADY_ALIGNED"
+1549             ):
+1550                 walk2 = walk_to(
+1551                     "FINAL_WALK",
+1552                     goal, renderer, timeout=32
+1553                 )
+1554                 print("Live final walk:", walk2)
+1555             else:
+1556                 walk2 = "NOT_STARTED"
+1557 
+1558         final_error = float(np.linalg.norm(
+1559             data.qpos[:2]-goal
+1560         ))
+1561 
+1562         # The trace also includes stopping and holding.
+1563         clear_ok = (
+
+==========
+
+1610 # ===== Finalize safe-goal-rejection classification =====
+1611 if not goal_policy_valid:
+1612     stage3_reason = "GOAL_MAP_INVALID_REJECTED"
+1613 elif goal_policy_unsafe:
+1614     if (
+1615         reason2 == "DEPTH_OBSTACLE_STOP"
+1616         and stage == "hold"
+1617         and len(trace) == 0
+1618         and not stage3_ok
+1619     ):
+1620         stage3_reason = "GOAL_UNSAFE_REJECTED"
+1621     else:
+1622         stage3_reason = "GOAL_POLICY_STOP_VALIDATION_FAILED"
+1623 
+1624 report = {
+1625     "step": 3,
+1626     "status": stage3_reason,
+1627     "pass": bool(stage3_ok),

@@ -1,0 +1,41 @@
+{
+  "segments": [
+    {
+      "section": "WAYPOINT_WALK",
+      "reason": "GOAL_TRIGGERED",
+      "pass": true,
+      "xy": [
+        -0.2610017388244616,
+        1.3868204405093394
+      ]
+    },
+    {
+      "section": "FINAL_TURN",
+      "reason": "TURN_REACHED",
+      "pass": true,
+      "xy": [
+        -0.21590042454519756,
+        1.4261911274564714
+      ]
+    },
+    {
+      "section": "FINAL_WALK",
+      "reason": "GOAL_TRIGGERED",
+      "pass": true,
+      "xy": [
+        -0.9966173855836857,
+        1.536934175276165
+      ]
+    }
+  ],
+  "overall_pass": true,
+  "trace_samples": 9785,
+  "min_estimated_clearance_m": 0.5516461126414197,
+  "min_extra_clearance_m": 0.5637720370933585,
+  "max_tilt_deg": 3.6204097241344146,
+  "final_xy": [
+    -0.9966173855836857,
+    1.536934175276165
+  ],
+  "final_error_m": 0.10978204892824146
+}

@@ -1,0 +1,516 @@
+from pathlib import Path
+import importlib.util
+import csv
+import math
+
+import mujoco
+import numpy as np
+from PIL import Image
+from ultralytics import YOLO
+
+folder = Path("../gate3_obstacle_stop_v01").resolve()
+model_path = folder / "obstacle_scene.xml"
+
+gait_path = Path(
+    "../gate2_integrated_soft_stop_v01/integrated_trial.py"
+).resolve()
+spec = importlib.util.spec_from_file_location("gate2_gait", gait_path)
+gait = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(gait)
+
+model = mujoco.MjModel.from_xml_path(str(model_path))
+data = mujoco.MjData(model)
+ai = YOLO("yolo26n.pt")
+
+LEGS = (
+    ("front", "left"), ("front", "right"),
+    ("hind", "left"), ("hind", "right"),
+)
+offsets = {
+    f"{s}_{side}": (
+        0.0 if (s, side) in (
+            ("front", "left"), ("hind", "right")
+        ) else 0.5
+    )
+    for s, side in LEGS
+}
+
+ids = {}
+for s, side in LEGS:
+    tag = f"{s}_{side}"
+    for joint in ("hip", "knee"):
+        name = f"{tag}_{joint}_drive"
+        idx = mujoco.mj_name2id(
+            model, mujoco.mjtObj.mjOBJ_ACTUATOR, name
+        )
+        if idx < 0:
+            raise RuntimeError(f"Missing actuator: {name}")
+        ids[name] = idx
+
+neck_jid = mujoco.mj_name2id(
+    model, mujoco.mjtObj.mjOBJ_JOINT, "neck_yaw"
+)
+neck_aid = mujoco.mj_name2id(
+    model, mujoco.mjtObj.mjOBJ_ACTUATOR, "neck_yaw_drive"
+)
+if neck_jid < 0 or neck_aid < 0:
+    raise RuntimeError("Neck joint or actuator not found")
+neck_qadr = int(model.jnt_qposadr[neck_jid])
+
+STOP_DEPTH = 0.70
+START_DEPTH = 0.85
+SCAN_INTERVAL = 0.50
+MAX_TURN_SECONDS = 15.0
+MAX_WALK_SECONDS = 17.0
+
+def initial_controls():
+    for i in range(model.nu):
+        jid = int(model.actuator_trnid[i, 0])
+        if 0 <= jid < model.njnt:
+            qadr = int(model.jnt_qposadr[jid])
+            lo, hi = model.actuator_ctrlrange[i]
+            data.ctrl[i] = float(
+                np.clip(data.qpos[qadr], lo, hi)
+            )
+
+def yaw_deg():
+    yaw, _, _ = gait.orientation(data)
+    return math.degrees(yaw)
+
+def posture_ok():
+    rot = np.zeros(9)
+    mujoco.mju_quat2Mat(rot, data.qpos[3:7])
+    R = rot.reshape(3, 3)
+    tilt = math.degrees(
+        math.acos(float(np.clip(R[2, 2], -1, 1)))
+    )
+    return (
+        float(data.qpos[2]) >= 0.16
+        and tilt <= 12.0
+    )
+
+def obstacle_distance(renderer):
+    """3D点群を使った前方通路の近接物体検知。"""
+    camera_id = mujoco.mj_name2id(
+        model, mujoco.mjtObj.mjOBJ_CAMERA, "dog_eye"
+    )
+    torso_id = mujoco.mj_name2id(
+        model, mujoco.mjtObj.mjOBJ_BODY, "torso"
+    )
+
+    if camera_id < 0 or torso_id < 0:
+        return float("nan")
+
+    renderer.enable_depth_rendering()
+    renderer.update_scene(data, camera="dog_eye")
+    depth = renderer.render().copy()
+    renderer.disable_depth_rendering()
+
+    h, w = depth.shape
+    fovy = math.radians(float(model.cam_fovy[camera_id]))
+    focal = h / (2.0 * math.tan(fovy / 2.0))
+
+    step = 4
+    vv, uu = np.mgrid[0:h:step, 0:w:step]
+    dd = depth[::step, ::step]
+
+    valid = np.isfinite(dd) & (dd > 0.01) & (dd < 10.0)
+    if not np.any(valid):
+        # Only the verified MuJoCo far-background pattern
+        # from this simulation scene is treated as empty.
+        background_only = (
+            np.all(np.isfinite(dd))
+            and np.all((dd >= 114.0) & (dd <= 115.0))
+            and float(np.ptp(dd)) < 0.01
+        )
+        if background_only:
+            return 10.0
+        return float("nan")
+
+    d = dd[valid].astype(float)
+    u = uu[valid]
+    v = vv[valid]
+
+    camera_points = np.column_stack((
+        (u + 0.5 - w / 2) * d / focal,
+        -(v + 0.5 - h / 2) * d / focal,
+        -d,
+    ))
+
+    cam_pos = data.cam_xpos[camera_id]
+    cam_rot = data.cam_xmat[camera_id].reshape(3, 3)
+    world_points = camera_points @ cam_rot.T + cam_pos
+
+    torso_pos = data.xpos[torso_id]
+    torso_rot = data.xmat[torso_id].reshape(3, 3)
+    body_points = (world_points - torso_pos) @ torso_rot
+
+    forward = -body_points[:, 0]
+    lateral = body_points[:, 1]
+    height = world_points[:, 2]
+
+    candidates = (
+        (height >= 0.06)
+        & (height <= 0.45)
+        & (forward > 0.0)
+        & (forward < 1.10)
+        & (np.abs(lateral) < 0.25)
+    )
+
+    if not np.any(candidates):
+        return 10.0
+
+    return float(np.min(forward[candidates]))
+
+
+def enforce_obstacle_stop(current_decision, renderer):
+    distance = obstacle_distance(renderer)
+
+    if not math.isfinite(distance):
+        return "OBSTACLE_SENSOR_STOP", distance
+
+    if distance < 1.10:
+        return "OBSTACLE_STOP", distance
+
+    return current_decision, distance
+
+
+def perceive(renderer, label, with_depth=False):
+    renderer.disable_depth_rendering()
+    renderer.update_scene(data, camera="dog_eye")
+    rgb = renderer.render().copy()
+
+    Image.fromarray(rgb).save(folder / f"{label}.png")
+
+    result = ai.predict(
+        source=rgb,
+        device="cpu",
+        conf=0.25,
+        verbose=False,
+    )[0]
+
+    persons = []
+    for box in result.boxes:
+        if result.names[int(box.cls.item())] != "person":
+            continue
+        x1, y1, x2, y2 = box.xyxy[0].tolist()
+        persons.append({
+            "confidence": float(box.conf.item()),
+            "cx": (x1 + x2) / 2,
+            "cy": (y1 + y2) / 2,
+        })
+
+    if not persons:
+        return None
+
+    best = max(persons, key=lambda p: p["confidence"])
+
+    info = {
+        "count": len(persons),
+        "confidence": best["confidence"],
+        "error_px": abs(best["cx"] - rgb.shape[1] / 2),
+        "depth": float("nan"),
+    }
+
+    if with_depth:
+        renderer.enable_depth_rendering()
+        renderer.update_scene(data, camera="dog_eye")
+        depth = renderer.render().copy()
+        h, w = depth.shape
+        cx = int(np.clip(best["cx"], 0, w - 1))
+        cy = int(np.clip(best["cy"], 0, h - 1))
+        info["depth"] = float(depth[cy, cx])
+
+    return info
+
+def set_legs(stage, elapsed, selected_angle):
+    moving = stage in ("turn", "walk")
+    stride = (
+        0.045 * gait.smoothstep(elapsed / 0.5)
+        if moving else 0.0
+    )
+    lift = (
+        0.012 * gait.smoothstep(elapsed / 1.0)
+        if moving else 0.0
+    )
+
+    for s, side in LEGS:
+        tag = f"{s}_{side}"
+
+        if moving:
+            signed_stride = stride
+            if stage == "turn":
+                signed_stride *= (
+                    -1 if side == "left" else 1
+                )
+                if selected_angle > 0:
+                    signed_stride *= -1
+
+            x, z = gait.trajectory(
+                elapsed, offsets[tag],
+                signed_stride, lift, 0.8
+            )
+        else:
+            x, z = 0.0, -0.163
+
+        hip, knee = gait.ik(x, z)
+
+        for joint, angle in (("hip", hip), ("knee", knee)):
+            idx = ids[f"{tag}_{joint}_drive"]
+            lo, hi = model.actuator_ctrlrange[idx]
+            target = float(np.clip(angle, lo, hi))
+
+            if stage in ("pause", "stopping", "hold"):
+                delta = 2.0 * model.opt.timestep
+                old = float(data.ctrl[idx])
+                target = float(np.clip(
+                    target, old - delta, old + delta
+                ))
+
+            data.ctrl[idx] = target
+
+# --- AIによる初期方向スキャン ---
+initial_controls()
+mujoco.mj_forward(model, data)
+scan = []
+
+with mujoco.Renderer(
+    model, width=640, height=360
+) as renderer:
+
+    print("=== AI scan ===")
+    for angle in (-20, 0, 20):
+        # 初回の方向探索だけは首の姿勢を直接設定
+        data.qpos[neck_qadr] = math.radians(angle)
+        mujoco.mj_forward(model, data)
+
+        info = perceive(renderer, f"scan_{angle:+d}")
+        if info is None:
+            print(f"neck={angle:+d}deg: no person")
+            continue
+
+        scan.append((angle, info["error_px"]))
+        print(
+            f"neck={angle:+d}deg "
+            f"center_error={info['error_px']:.1f}px "
+            f"people={info['count']}"
+        )
+
+    if not scan:
+        print("Result: UNKNOWN_STOP (no person)")
+        raise SystemExit(0)
+
+    selected_angle, _ = min(scan, key=lambda v: v[1])
+    print("AI selected direction:", selected_angle)
+
+    # スキャン終了後は初期姿勢から物理シミュレーション開始
+    mujoco.mj_resetData(model, data)
+    initial_controls()
+    mujoco.mj_forward(model, data)
+
+    stage = "stand"
+    stage_start = 0.0
+    turn_start_yaw = None
+    walk_start_time = None
+    next_scan = float("inf")
+    decision = "SCAN_COMPLETE"
+    last_depth = float("nan")
+    stop_reason = ""
+    rows = []
+
+    def change_stage(new_stage):
+        global stage, stage_start
+        print(
+            f"t={data.time:.3f}s: "
+            f"{stage} -> {new_stage}"
+        )
+        stage = new_stage
+        stage_start = float(data.time)
+
+    while data.time < 40.0:
+        t = float(data.time)
+        elapsed = t - stage_start
+
+        # AIから独立した姿勢監視
+        if not posture_ok() and stage not in (
+            "stopping", "hold"
+        ):
+            decision = "EMERGENCY_STOP"
+            stop_reason = decision
+            change_stage("stopping")
+            elapsed = 0.0
+
+        if stage == "stand" and elapsed >= 2.0:
+            if selected_angle == 0:
+                change_stage("pause")
+            else:
+                turn_start_yaw = yaw_deg()
+                change_stage("turn")
+            elapsed = 0.0
+
+        elif stage == "turn":
+            change = (
+                (yaw_deg() - turn_start_yaw + 180) % 360
+            ) - 180
+            target = max(0.0, abs(selected_angle) - 1.5)
+
+            reached = (
+                change <= -target
+                if selected_angle < 0 else change >= target
+            )
+            if reached or elapsed >= MAX_TURN_SECONDS:
+                if not reached:
+                    decision = "TURN_TIMEOUT_STOP"
+                    stop_reason = decision
+                    change_stage("stopping")
+                else:
+                    print(f"Body turn at trigger: {change:.2f}deg")
+                    change_stage("pause")
+                elapsed = 0.0
+
+        elif stage == "pause" and elapsed >= 1.0:
+            info = perceive(
+                renderer, "after_turn", with_depth=True
+            )
+
+            if info is None:
+                decision = "UNKNOWN_STOP"
+            else:
+                last_depth = info["depth"]
+                if not math.isfinite(last_depth) or last_depth <= 0:
+                    decision = "UNKNOWN_STOP"
+                elif info["error_px"] > 100:
+                    decision = "NOT_ALIGNED_STOP"
+                elif last_depth <= STOP_DEPTH:
+                    decision = "STOP_NEAR_PERSON"
+                elif last_depth > START_DEPTH:
+                    decision = "FORWARD_ALLOWED"
+                else:
+                    decision = "MARGIN_STOP"
+
+            decision, obstacle_depth = enforce_obstacle_stop(
+                decision, renderer
+            )
+
+            print(
+                f"AI after turn: {decision}, "
+                f"person_depth={last_depth:.3f}m, "
+                f"obstacle_depth={obstacle_depth:.3f}m"
+            )
+
+            if decision == "FORWARD_ALLOWED":
+                change_stage("walk")
+                walk_start_time = t
+                next_scan = t + SCAN_INTERVAL
+            else:
+                stop_reason = decision
+                change_stage("stopping")
+            elapsed = 0.0
+
+        elif stage == "walk":
+            if t >= next_scan:
+                info = perceive(
+                    renderer,
+                    f"walking_{int(t * 1000):06d}",
+                    with_depth=True,
+                )
+                if info is None:
+                    decision = "UNKNOWN_STOP"
+                else:
+                    last_depth = info["depth"]
+                    if not math.isfinite(last_depth) or last_depth <= 0:
+                        decision = "UNKNOWN_STOP"
+                    elif info["error_px"] > 100:
+                        decision = "NOT_ALIGNED_STOP"
+                    elif last_depth <= STOP_DEPTH:
+                        decision = "STOP_NEAR_PERSON"
+                    else:
+                        decision = "FORWARD_ALLOWED"
+
+                decision, obstacle_depth = enforce_obstacle_stop(
+                    decision, renderer
+                )
+
+                print(
+                    f"t={t:.2f}s AI={decision} "
+                    f"person_depth={last_depth:.3f}m "
+                    f"obstacle_depth={obstacle_depth:.3f}m"
+                )
+                next_scan = t + SCAN_INTERVAL
+
+                if decision != "FORWARD_ALLOWED":
+                    stop_reason = decision
+                    change_stage("stopping")
+
+            if (
+                stage == "walk"
+                and t - walk_start_time >= MAX_WALK_SECONDS
+            ):
+                decision = "WALK_TIMEOUT_STOP"
+                stop_reason = decision
+                change_stage("stopping")
+
+        elif stage == "stopping" and elapsed >= 1.0:
+            change_stage("hold")
+
+        elif stage == "hold" and elapsed >= 2.0:
+            break
+
+        data.ctrl[neck_aid] = 0.0
+        set_legs(stage, t - stage_start, selected_angle)
+        mujoco.mj_step(model, data)
+
+        rows.append({
+            "time_s": float(data.time),
+            "stage": stage,
+            "x_m": float(data.qpos[0]),
+            "y_m": float(data.qpos[1]),
+            "height_m": float(data.qpos[2]),
+            "yaw_deg": yaw_deg(),
+            "depth_m": last_depth,
+            "decision": decision,
+        })
+
+    final_info = perceive(
+        renderer, "final_view", with_depth=True
+    )
+
+with (folder / "ai_approach.csv").open("w", newline="") as f:
+    writer = csv.DictWriter(
+        f, fieldnames=list(rows[0])
+    )
+    writer.writeheader()
+    writer.writerows(rows)
+
+print("\n=== Gate 3 AI Approach Result ===")
+print("AI selected angle:", selected_angle)
+print("Final stage:", stage)
+print("Stop reason:", stop_reason)
+print("Final yaw:", f"{yaw_deg():.2f}deg")
+print("Final height:", f"{data.qpos[2]:.4f}m")
+
+if final_info:
+    print(
+        "Final camera depth:",
+        f"{final_info['depth']:.3f}m"
+    )
+    print(
+        "Final center error:",
+        f"{final_info['error_px']:.1f}px"
+    )
+
+stop_rows = [r for r in rows if r["stage"] == "stopping"]
+if stop_rows:
+    sx = stop_rows[0]["x_m"]
+    sy = stop_rows[0]["y_m"]
+    final_drift = math.hypot(
+        rows[-1]["x_m"] - sx,
+        rows[-1]["y_m"] - sy,
+    )
+    print(
+        "Horizontal displacement after stop command:",
+        f"{final_drift * 1000:.2f}mm"
+    )
+
+print("CSV:", folder / "ai_approach.csv")
+print("Exploratory simulation only; not hardware-safe.")

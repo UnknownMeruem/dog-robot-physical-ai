@@ -1,0 +1,23 @@
+{
+  "exit_code": 1,
+  "dynamic_appeared": false,
+  "dynamic_stop_detected": false,
+  "reobservation_valid": false,
+  "hybrid_astar_planned": false,
+  "recovery": {},
+  "trace_rows": 0,
+  "clearances": {
+    "estimated_clearance_m": null,
+    "extra_clearance_m": null,
+    "red_clearance_m": null,
+    "dynamic_clearance_m": null
+  },
+  "minimum_height_m": null,
+  "maximum_tilt_deg": null,
+  "guard_samples": 0,
+  "obstacle_contact_samples": 0,
+  "trajectory_checks_pass": false,
+  "integrated_replan_arrival_pass": false,
+  "full_body_leg_sweep_verified": false,
+  "camera_only_multi_obstacle_mapping_verified": false
+}

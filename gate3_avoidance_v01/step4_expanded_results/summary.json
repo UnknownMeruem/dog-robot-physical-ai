@@ -1,0 +1,65 @@
+[
+  {
+    "case": "baseline",
+    "shift_y_m": 0.0,
+    "pass": true,
+    "return_code": 0,
+    "report": {
+      "step": 3,
+      "status": "PASS",
+      "pass": true,
+      "depth_source": "current simulation observation",
+      "goal": [
+        -1.1,
+        1.5
+      ],
+      "final_xy": [
+        -0.990207350563813,
+        1.5398175822652178
+      ],
+      "trace_samples": 12849
+    }
+  },
+  {
+    "case": "plus_10cm",
+    "shift_y_m": 0.1,
+    "pass": false,
+    "return_code": 0,
+    "report": {
+      "step": 3,
+      "status": "LIVE_OBSERVATION_NOT_READY",
+      "pass": false,
+      "depth_source": "current simulation observation",
+      "goal": [
+        -1.1,
+        1.5
+      ],
+      "final_xy": [
+        -0.22038498686604566,
+        0.42642822303482175
+      ],
+      "trace_samples": 0
+    }
+  },
+  {
+    "case": "minus_10cm",
+    "shift_y_m": -0.1,
+    "pass": true,
+    "return_code": 0,
+    "report": {
+      "step": 3,
+      "status": "PASS",
+      "pass": true,
+      "depth_source": "current simulation observation",
+      "goal": [
+        -1.1,
+        1.5
+      ],
+      "final_xy": [
+        -0.9916049726074064,
+        1.514560332627516
+      ],
+      "trace_samples": 14017
+    }
+  }
+]

@@ -1,0 +1,15 @@
+{
+  "step": 3,
+  "status": "NO_ROBUST_ROUTE",
+  "pass": false,
+  "depth_source": "current simulation observation",
+  "goal": [
+    -1.1,
+    1.5
+  ],
+  "final_xy": [
+    -0.22038498686604566,
+    0.42642822303482175
+  ],
+  "trace_samples": 0
+}

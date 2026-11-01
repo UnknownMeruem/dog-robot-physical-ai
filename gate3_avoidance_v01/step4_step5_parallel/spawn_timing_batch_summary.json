@@ -1,0 +1,60 @@
+{
+  "trials": [
+    {
+      "trial": "spawn_4s",
+      "exit_code": 0,
+      "dynamic_spawned": true,
+      "dynamic_depth_stop": true,
+      "fresh_depth_m": 0.6162139509810901,
+      "planner": "PLANNED",
+      "recovery_outcome": "POST_TURN_ROUTE_UNSAFE",
+      "reserve_diagnostics": {},
+      "waypoints_attempted": 1,
+      "waypoints_completed": 0,
+      "trace_rows": 8908,
+      "minimum_clearances_m": {
+        "estimated_clearance_m": 0.5852040919819764,
+        "dynamic_clearance_m": 0.5588029823423644,
+        "extra_clearance_m": 0.5588029823423644,
+        "red_clearance_m": 0.5483220505992306
+      },
+      "minimum_height_m": 0.21001326086091715,
+      "maximum_tilt_deg": 3.645686860954952,
+      "guard_samples": 0,
+      "obstacle_contact_pairs": {},
+      "trajectory_checks_pass": true,
+      "dynamic_replan_arrival_pass": false,
+      "full_body_sweep_certified": false,
+      "camera_only_mapping_certified": false
+    },
+    {
+      "trial": "spawn_6s",
+      "exit_code": 0,
+      "dynamic_spawned": true,
+      "dynamic_depth_stop": true,
+      "fresh_depth_m": 0.6138310401170358,
+      "planner": "PLANNED",
+      "recovery_outcome": "WAYPOINT_BUDGET_STOP",
+      "reserve_diagnostics": {},
+      "waypoints_attempted": 0,
+      "waypoints_completed": 0,
+      "trace_rows": 6602,
+      "minimum_clearances_m": {
+        "estimated_clearance_m": 0.5852040919819764,
+        "dynamic_clearance_m": 0.6077905335626748,
+        "extra_clearance_m": 0.6077905335626748,
+        "red_clearance_m": 0.5483220505992306
+      },
+      "minimum_height_m": 0.21001169276596895,
+      "maximum_tilt_deg": 3.645686860954952,
+      "guard_samples": 0,
+      "obstacle_contact_pairs": {},
+      "trajectory_checks_pass": true,
+      "dynamic_replan_arrival_pass": false,
+      "full_body_sweep_certified": false,
+      "camera_only_mapping_certified": false
+    }
+  ],
+  "successful_arrivals": 0,
+  "gate3_complete": false
+}

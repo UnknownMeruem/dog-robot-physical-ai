@@ -1,0 +1,50 @@
+[
+  {
+    "case": "x_minus_05",
+    "observed_status": "PASS",
+    "goal_clearance_m": 0.5720008610286307,
+    "decision": "ARRIVAL_VERIFIED",
+    "next_action": "Keep regression test",
+    "verified_pass": true
+  },
+  {
+    "case": "x_plus_05",
+    "observed_status": "TRAJECTORY_OR_GUARD_FAIL",
+    "goal_clearance_m": 0.5725891880681162,
+    "decision": "CONTROL_CONVERGENCE_OR_GUARD_FAILURE",
+    "next_action": "Inspect corrective heading loop and stop reason",
+    "verified_pass": false
+  },
+  {
+    "case": "y_minus_05",
+    "observed_status": "PASS",
+    "goal_clearance_m": 0.6267057616200515,
+    "decision": "ARRIVAL_VERIFIED",
+    "next_action": "Keep regression test",
+    "verified_pass": true
+  },
+  {
+    "case": "y_plus_05",
+    "observed_status": "NO_ROBUST_ROUTE",
+    "goal_clearance_m": 0.5212393764444205,
+    "decision": "PLANNING_MARGIN_INSUFFICIENT",
+    "next_action": "Implement explicit conservative rejection",
+    "verified_pass": false
+  },
+  {
+    "case": "xy_shift",
+    "observed_status": "NO_ROBUST_ROUTE",
+    "goal_clearance_m": 0.5210020254394638,
+    "decision": "PLANNING_MARGIN_INSUFFICIENT",
+    "next_action": "Implement explicit conservative rejection",
+    "verified_pass": false
+  },
+  {
+    "case": "nan_map_fault",
+    "observed_status": "GOAL_MAP_INVALID_REJECTED",
+    "goal_clearance_m": 0.5719999878220181,
+    "decision": "INVALID_SENSOR_REJECTION_VERIFIED",
+    "next_action": "Add more sensor faults",
+    "verified_pass": true
+  }
+]

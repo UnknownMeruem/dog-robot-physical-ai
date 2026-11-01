@@ -1,0 +1,243 @@
+{
+  "runtime_clearance_m": 0.521,
+  "planning_clearance_m": 0.551,
+  "observed_maximum_turn_drift_m": 0.07028992842706838,
+  "note": "Observed maximum is retrospective only. It is NOT a certified future drift bound. No new controller motion is authorized.",
+  "cases": [
+    {
+      "case": "case_00",
+      "status": "PASS",
+      "turns": [
+        {
+          "section": "LIVE_TURN1",
+          "samples": 2431,
+          "maximum_xy_drift_m": 0.05471248721617486,
+          "final_xy_drift_m": 0.051038003348147065,
+          "minimum_estimated_clearance_m": 0.6861662424496481,
+          "runtime_violation": false
+        },
+        {
+          "section": "LIVE_CORRECTIVE_TURN",
+          "samples": 674,
+          "maximum_xy_drift_m": 0.01196653038926263,
+          "final_xy_drift_m": 0.007160192886953512,
+          "minimum_estimated_clearance_m": 0.687667919211325,
+          "runtime_violation": false
+        },
+        {
+          "section": "LIVE_FINAL_TURN",
+          "samples": 3075,
+          "maximum_xy_drift_m": 0.05843662812372896,
+          "final_xy_drift_m": 0.05599315416059258,
+          "minimum_estimated_clearance_m": 0.8251593721269384,
+          "runtime_violation": false
+        }
+      ],
+      "guard_samples": 0,
+      "first_guard": null,
+      "trace_samples": 12849,
+      "log_has_post_turn_zero_candidates": false
+    },
+    {
+      "case": "case_01",
+      "status": "GOAL_UNSAFE_REJECTED",
+      "turns": [],
+      "guard_samples": 0,
+      "first_guard": null,
+      "trace_samples": 0,
+      "log_has_post_turn_zero_candidates": false
+    },
+    {
+      "case": "case_02",
+      "status": "TRAJECTORY_OR_GUARD_FAIL",
+      "turns": [
+        {
+          "section": "LIVE_TURN1",
+          "samples": 2763,
+          "maximum_xy_drift_m": 0.07028992842706838,
+          "final_xy_drift_m": 0.0660546135146223,
+          "minimum_estimated_clearance_m": 0.5207239719752612,
+          "runtime_violation": true
+        }
+      ],
+      "guard_samples": 8,
+      "first_guard": {
+        "section": "LIVE_TURN1",
+        "reason": "CLEARANCE_STOP",
+        "time_s": "51.00500000000764"
+      },
+      "trace_samples": 2763,
+      "log_has_post_turn_zero_candidates": true
+    },
+    {
+      "case": "case_03",
+      "status": "GOAL_UNSAFE_REJECTED",
+      "turns": [],
+      "guard_samples": 0,
+      "first_guard": null,
+      "trace_samples": 0,
+      "log_has_post_turn_zero_candidates": false
+    },
+    {
+      "case": "case_04",
+      "status": "GOAL_UNSAFE_REJECTED",
+      "turns": [],
+      "guard_samples": 0,
+      "first_guard": null,
+      "trace_samples": 0,
+      "log_has_post_turn_zero_candidates": false
+    },
+    {
+      "case": "case_05",
+      "status": "GOAL_UNSAFE_REJECTED",
+      "turns": [],
+      "guard_samples": 0,
+      "first_guard": null,
+      "trace_samples": 0,
+      "log_has_post_turn_zero_candidates": false
+    },
+    {
+      "case": "case_06",
+      "status": "PASS",
+      "turns": [
+        {
+          "section": "LIVE_TURN1",
+          "samples": 2431,
+          "maximum_xy_drift_m": 0.05471248721617486,
+          "final_xy_drift_m": 0.051038003348147065,
+          "minimum_estimated_clearance_m": 0.67934594858502,
+          "runtime_violation": false
+        },
+        {
+          "section": "LIVE_CORRECTIVE_TURN",
+          "samples": 1321,
+          "maximum_xy_drift_m": 0.02038387345225786,
+          "final_xy_drift_m": 0.010821112437316224,
+          "minimum_estimated_clearance_m": 0.6686967851624136,
+          "runtime_violation": false
+        },
+        {
+          "section": "LIVE_FINAL_TURN",
+          "samples": 3271,
+          "maximum_xy_drift_m": 0.06422452501810773,
+          "final_xy_drift_m": 0.06051849468839653,
+          "minimum_estimated_clearance_m": 0.8993322013321585,
+          "runtime_violation": false
+        }
+      ],
+      "guard_samples": 0,
+      "first_guard": null,
+      "trace_samples": 14033,
+      "log_has_post_turn_zero_candidates": false
+    },
+    {
+      "case": "case_07",
+      "status": "TRAJECTORY_OR_GUARD_FAIL",
+      "turns": [
+        {
+          "section": "LIVE_TURN1",
+          "samples": 2670,
+          "maximum_xy_drift_m": 0.06258632563770343,
+          "final_xy_drift_m": 0.06054722663354508,
+          "minimum_estimated_clearance_m": 0.5450563274530547,
+          "runtime_violation": false
+        },
+        {
+          "section": "LIVE_CORRECTIVE_TURN",
+          "samples": 1068,
+          "maximum_xy_drift_m": 0.026323899968118406,
+          "final_xy_drift_m": 0.025208536170007064,
+          "minimum_estimated_clearance_m": 0.5289829359529374,
+          "runtime_violation": false
+        }
+      ],
+      "guard_samples": 0,
+      "first_guard": null,
+      "trace_samples": 3738,
+      "log_has_post_turn_zero_candidates": true
+    },
+    {
+      "case": "case_08",
+      "status": "GOAL_UNSAFE_REJECTED",
+      "turns": [],
+      "guard_samples": 0,
+      "first_guard": null,
+      "trace_samples": 0,
+      "log_has_post_turn_zero_candidates": false
+    },
+    {
+      "case": "case_09",
+      "status": "GOAL_UNSAFE_REJECTED",
+      "turns": [],
+      "guard_samples": 0,
+      "first_guard": null,
+      "trace_samples": 0,
+      "log_has_post_turn_zero_candidates": false
+    },
+    {
+      "case": "case_10",
+      "status": "GOAL_UNSAFE_REJECTED",
+      "turns": [],
+      "guard_samples": 0,
+      "first_guard": null,
+      "trace_samples": 0,
+      "log_has_post_turn_zero_candidates": false
+    },
+    {
+      "case": "case_11",
+      "status": "GOAL_UNSAFE_REJECTED",
+      "turns": [],
+      "guard_samples": 0,
+      "first_guard": null,
+      "trace_samples": 0,
+      "log_has_post_turn_zero_candidates": false
+    }
+  ],
+  "controller_definitions": {
+    "guard": {
+      "first_line": 1028,
+      "last_line": 1055,
+      "source": "def guard():\n    est = estimated_clearance()\n    extra = xy_clearance(extra_id)\n    red = xy_clearance(box_id)\n    height, tilt = posture()\n\n    collision = False\n    for j in range(data.ncon):\n        c = data.contact[j]\n        if extra_id in (int(c.geom1), int(c.geom2)):\n            collision = True\n        if box_id in (int(c.geom1), int(c.geom2)):\n            collision = True\n\n    if collision:\n        reason = \"CONTACT_STOP\"\n    elif not np.all(np.isfinite([\n        est, extra, red, height, tilt\n    ])):\n        reason = \"STATE_INVALID_STOP\"\n    elif min(est, extra, red) < CLEARANCE:\n        reason = \"CLEARANCE_STOP\"\n    elif height < MIN_HEIGHT or tilt > MAX_TILT:\n        reason = \"POSTURE_STOP\"\n    else:\n        reason = None\n\n    return reason, est, extra, red, height, tilt"
+    },
+    "turn_to": {
+      "first_line": 1097,
+      "last_line": 1146,
+      "source": "def turn_to(section, goal):\n    global stage, stage_start, target_angle\n\n    delta = goal-data.qpos[:2]\n    desired = math.degrees(math.atan2(-delta[1],-delta[0]))\n    initial = yaw_deg()\n    command = angle_error(desired, initial)\n\n    print(f\"{section}: turn command={command:+.2f}deg\")\n\n    if guard()[0]:\n        return \"START_GUARD_STOP\"\n\n    if abs(command) <= 2.0:\n        return \"TURN_ALREADY_ALIGNED\"\n\n    target_angle = command\n    stage = \"turn\"\n    stage_start = float(data.time)\n    beginning = float(data.time)\n    reason = \"TURN_TIMEOUT\"\n\n    while float(data.time)-beginning < 30:\n        actual = angle_error(yaw_deg(), initial)\n\n        if abs(command)-abs(actual) <= 1.5:\n            reason = \"TURN_REACHED\"\n            break\n\n        set_legs(\"turn\", float(data.time)-stage_start)\n        mujoco.mj_step(model,data)\n        failure = record(section, \"\", float(\"nan\"))\n        if failure:\n            reason = failure\n            break\n\n    soft_hold(section, reason)\n    final_error = abs(angle_error(desired,yaw_deg()))\n\n    if reason == \"TURN_REACHED\" and final_error > 5.0:\n        reason = \"TURN_ACCURACY_FAIL\"\n\n    if guard()[0]:\n        reason = guard()[0]\n\n    print(\n        f\"{section}: {reason}, \"\n        f\"yaw_error={final_error:.2f}deg\"\n    )\n    return reason"
+    },
+    "walk_to": {
+      "first_line": 1148,
+      "last_line": 1234,
+      "source": "def walk_to(section, goal, renderer, timeout=28):\n    global stage, stage_start\n\n    if guard()[0]:\n        return \"START_GUARD_STOP\"\n\n    start_xy = data.qpos[:2].copy()\n    start_yaw = yaw_deg()\n    heading = math.radians(start_yaw)\n    direction = np.array([\n        -math.cos(heading),-math.sin(heading)\n    ])\n    initial_goal_distance = float(np.linalg.norm(goal-start_xy))\n\n    stage = \"walk\"\n    stage_start = float(data.time)\n    beginning = float(data.time)\n    last_depth = -1e9\n    nearest = float(\"nan\")\n    reason = \"WALK_TIMEOUT\"\n\n    while float(data.time)-beginning < timeout:\n        t = float(data.time)\n        xy = data.qpos[:2].copy()\n        displacement = xy-start_xy\n        forward = float(np.dot(displacement,direction))\n        lateral = abs(float(\n            direction[0]*displacement[1]\n            -direction[1]*displacement[0]\n        ))\n        error = float(np.linalg.norm(goal-xy))\n\n        if t-last_depth >= 0.40:\n            last_depth = t\n            try:\n                nearest = float(detect_depth(renderer))\n            except Exception as exc:\n                print(\"Depth exception:\",repr(exc))\n                nearest = float(\"nan\")\n\n        failure = guard()[0]\n        if failure:\n            reason = failure\n            break\n        if not math.isfinite(nearest):\n            reason = \"DEPTH_SENSOR_STOP\"\n            break\n        if nearest < 0.55:\n            reason = \"DEPTH_OBSTACLE_STOP\"\n            break\n        if lateral > 0.08:\n            reason = \"PATH_DEVIATION_STOP\"\n            break\n        if abs(angle_error(start_yaw,yaw_deg())) > 10:\n            reason = \"HEADING_STOP\"\n            break\n        if error <= (\n            FINAL_TOL if section == \"FINAL_WALK\"\n            else WAYPOINT_TOL\n        ):\n            reason = \"GOAL_TRIGGERED\"\n            break\n        if forward > initial_goal_distance+0.10:\n            reason = \"DISTANCE_LIMIT_STOP\"\n            break\n\n        set_legs(\"walk\",t-stage_start)\n        mujoco.mj_step(model,data)\n        failure = record(section,\"\",nearest)\n        if failure:\n            reason = failure\n            break\n\n    soft_hold(section,reason)\n    final_error = float(np.linalg.norm(goal-data.qpos[:2]))\n\n    if reason == \"GOAL_TRIGGERED\" and final_error > 0.15:\n        reason = \"FINAL_ACCURACY_FAIL\"\n    if guard()[0]:\n        reason = guard()[0]\n\n    print(\n        f\"{section}: {reason}, \"\n        f\"goal_error={final_error:.3f}m, \"\n        f\"final_xy={np.round(data.qpos[:2],4)}\"\n    )\n    return reason"
+    }
+  },
+  "controller_calls": [
+    {
+      "line": 1361,
+      "call": "route_candidates()"
+    },
+    {
+      "line": 1419,
+      "call": "turn_to(\"LIVE_TURN1\", via)"
+    },
+    {
+      "line": 1427,
+      "call": "route_candidates()"
+    },
+    {
+      "line": 1472,
+      "call": "turn_to(\n                        \"LIVE_CORRECTIVE_TURN\",\n                        via\n                    )"
+    }
+  ],
+  "next_design": {
+    "required": [
+      "Predict turn sweep before first turn",
+      "Reject turn if sweep margin is inadequate",
+      "Check map and clearance during turning",
+      "Reobserve from the stopped pose",
+      "Replan without assuming the original waypoint",
+      "Treat absent safe route as a safe stop",
+      "Verify multiple obstacle occupancy separately"
+    ],
+    "current_step4_complete": false
+  }
+}

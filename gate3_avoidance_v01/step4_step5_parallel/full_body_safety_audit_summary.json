@@ -1,0 +1,75 @@
+{
+  "exit_code": 0,
+  "recovery": {
+    "new_obstacle_spawned": true,
+    "fresh_depth_m": 0.6306575211552882,
+    "reobservation_valid": true,
+    "map_type": "hybrid_depth_and_mujoco_geometry",
+    "planner_result": "PLANNED",
+    "replan_nodes": 71,
+    "waypoints_attempted": 1,
+    "waypoints_completed": 0,
+    "outcome": "TURN_RESERVE_STOP",
+    "compressed_waypoints": [
+      [
+        -0.21807484795455429,
+        0.3879284162819689
+      ],
+      [
+        0.30000000000000027,
+        0.3500000000000001
+      ],
+      [
+        0.6000000000000001,
+        0.5500000000000002
+      ],
+      [
+        0.75,
+        0.9
+      ],
+      [
+        0.7000000000000002,
+        1.3000000000000003
+      ],
+      [
+        0.4500000000000002,
+        1.6
+      ],
+      [
+        0.050000000000000266,
+        1.65
+      ],
+      [
+        -1.1,
+        1.5
+      ]
+    ],
+    "reserve_diagnostics": {
+      "time_s": 65.83000000001262,
+      "robot_xy": [
+        -0.21807484795455429,
+        0.3879284162819689
+      ],
+      "yaw_deg": -119.43953635240288,
+      "estimated_m": 0.5971539224411112,
+      "dynamic_m": 0.6291390154248397,
+      "extra_m": 0.6250107701954604,
+      "red_m": 0.6115177611724487,
+      "required_m": 0.611
+    }
+  },
+  "contacts": {
+    "contact_samples": 17987,
+    "penetration_samples": 364,
+    "contact_pairs": {
+      "floor / front_left_foot": 5067,
+      "floor / front_right_foot": 4647,
+      "floor / hind_left_foot": 4204,
+      "floor / hind_right_foot": 4069
+    },
+    "minimum_contact_distance_m": -0.0014837182169750093
+  },
+  "all_robot_contacts_instrumented": true,
+  "full_body_sweep_clearance_certified": false,
+  "gate3_complete": false
+}

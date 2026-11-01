@@ -1,0 +1,44 @@
+[
+  {
+    "case": "baseline",
+    "classification": "GOAL_FEASIBLE_CHECK_ROUTE",
+    "start_clearance_m": 0.6844226194209552,
+    "original_goal_clearance_m": 0.5719999878220181,
+    "runtime_margin_m": 0.05099998782201809,
+    "planning_margin_m": 0.020999987822018062,
+    "candidate_count": 565,
+    "alternative_goal": [
+      -1.0999999999999996,
+      1.5000000000000002
+    ],
+    "alternative_not_executed": true
+  },
+  {
+    "case": "plus_10cm",
+    "classification": "GOAL_VIOLATES_RUNTIME_CLEARANCE",
+    "start_clearance_m": 0.7260499926121746,
+    "original_goal_clearance_m": 0.47047556380002353,
+    "runtime_margin_m": -0.050524436199976486,
+    "planning_margin_m": -0.08052443619997651,
+    "candidate_count": 0,
+    "alternative_goal": [
+      -1.0999999999999996,
+      1.6000000000000003
+    ],
+    "alternative_not_executed": true
+  },
+  {
+    "case": "minus_10cm",
+    "classification": "GOAL_FEASIBLE_CHECK_ROUTE",
+    "start_clearance_m": 0.6555304420422174,
+    "original_goal_clearance_m": 0.6717036266378681,
+    "runtime_margin_m": 0.15070362663786807,
+    "planning_margin_m": 0.12070362663786804,
+    "candidate_count": 710,
+    "alternative_goal": [
+      -1.0999999999999996,
+      1.5000000000000002
+    ],
+    "alternative_not_executed": true
+  }
+]

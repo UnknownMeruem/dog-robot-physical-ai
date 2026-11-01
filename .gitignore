@@ -19,3 +19,26 @@ __pycache__/
 
 # Windows download metadata
 *:Zone.Identifier
+
+# Python / development environments
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+genesis_env/
+
+# Generated ML training artifacts
+runs/
+
+# Downloadable pretrained weights
+yolo26n.pt
+
+# Temporary output artifacts
+/dog_robot_v02/hold
+/dog_robot_v02/stopping
+/dog_robot_v02/walking
+
+# Operating-system files
+.DS_Store
+Thumbs.db

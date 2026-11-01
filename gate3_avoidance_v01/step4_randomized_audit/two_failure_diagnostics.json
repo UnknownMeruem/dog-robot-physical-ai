@@ -1,0 +1,138 @@
+[
+  {
+    "case": "case_02",
+    "status": "TRAJECTORY_OR_GUARD_FAIL",
+    "report": {
+      "step": 3,
+      "status": "TRAJECTORY_OR_GUARD_FAIL",
+      "pass": false,
+      "depth_source": "current simulation observation",
+      "goal": [
+        -1.1,
+        1.5
+      ],
+      "final_xy": [
+        -0.28289838414289004,
+        0.4050907821016991
+      ],
+      "trace_samples": 2763
+    },
+    "guard_samples": 8,
+    "clearance_minima": {
+      "estimated_clearance_m": 0.5207239719752612,
+      "extra_clearance_m": 0.5486027969414582,
+      "red_clearance_m": 0.5532486208562825
+    },
+    "controller_events": [
+      "Stage 2 walk stop: distance=0.000m reason=DEPTH_OBSTACLE_STOP",
+      "Stop reason: DEPTH_OBSTACLE_STOP",
+      "Depth guard final stop reason: DEPTH_OBSTACLE_STOP",
+      "Depth stop: DEPTH_OBSTACLE_STOP",
+      "Depth stop: DEPTH_OBSTACLE_STOP",
+      "GOAL_POLICY_CLEARANCE: 0.6535m",
+      "GOAL_POLICY_UNSAFE: False",
+      "LIVE_TURN1: turn command=-69.13deg",
+      "LIVE_TURN1: TURN_REACHED, yaw_error=0.61deg",
+      "POST_TURN_CANDIDATES: 0 iteration: 0",
+      "Status: TRAJECTORY_OR_GUARD_FAIL",
+      "GATE3_STEP3: FAIL",
+      "First guard violation: CLEARANCE_STOP"
+    ],
+    "log_tail": [
+      "Selected live waypoint: [-0.15  1.3 ]",
+      "Predicted minimum clearance: 0.571m",
+      "Planned path length: 1.847m",
+      "LIVE_TURN1: turn command=-69.13deg",
+      "LIVE_TURN1: TURN_REACHED, yaw_error=0.61deg",
+      "Live turn 1: TURN_REACHED",
+      "POST_TURN_CANDIDATES: 0 iteration: 0",
+      "Trajectory CSV: /home/kato/physical_ai_todai/dog_robot/gate3_avoidance_v01/step4_random_case_02_live_autonomous_route_v3.csv",
+      "",
+      "=== GATE 3 STEP 3 SUMMARY ===",
+      "Status: TRAJECTORY_OR_GUARD_FAIL",
+      "Final XY: [-0.2829  0.4051]",
+      "Trace samples: 2763",
+      "GATE3_STEP3: FAIL",
+      "Report: /home/kato/physical_ai_todai/dog_robot/gate3_avoidance_v01/step4_random_case_02_live_autonomous_route_v3.json",
+      "Simulation only. Full-body safety not certified.",
+      "",
+      "=== GATE 3 STEP 3 DIAGNOSTIC ===",
+      "camera_estimate: minimum=0.5207m at t=51.02000000000765 XY=(-0.28919043431269437,0.4160473091742741)",
+      "extra_box: minimum=0.5486m at t=51.02000000000765 XY=(-0.28919043431269437,0.4160473091742741)",
+      "red_box: minimum=0.5532m at t=51.06000000000767 XY=(-0.2890810711354997,0.41224015785739115)",
+      "First guard violation: CLEARANCE_STOP",
+      "First violation position: -0.28873904997464483 0.4165238225515315",
+      "GATE3_STEP3_V3: FAIL"
+    ]
+  },
+  {
+    "case": "case_07",
+    "status": "TRAJECTORY_OR_GUARD_FAIL",
+    "report": {
+      "step": 3,
+      "status": "TRAJECTORY_OR_GUARD_FAIL",
+      "pass": false,
+      "depth_source": "current simulation observation",
+      "goal": [
+        -1.1,
+        1.5
+      ],
+      "final_xy": [
+        -0.3004659817256871,
+        0.3966584166383068
+      ],
+      "trace_samples": 3738
+    },
+    "guard_samples": 0,
+    "clearance_minima": {
+      "estimated_clearance_m": 0.5289829359529374,
+      "extra_clearance_m": 0.5581529084725168,
+      "red_clearance_m": 0.5358775875191862
+    },
+    "controller_events": [
+      "Stage 2 walk stop: distance=0.000m reason=DEPTH_OBSTACLE_STOP",
+      "Stop reason: DEPTH_OBSTACLE_STOP",
+      "Depth guard final stop reason: DEPTH_OBSTACLE_STOP",
+      "Depth stop: DEPTH_OBSTACLE_STOP",
+      "Depth stop: DEPTH_OBSTACLE_STOP",
+      "GOAL_POLICY_CLEARANCE: 0.6344m",
+      "GOAL_POLICY_UNSAFE: False",
+      "LIVE_TURN1: turn command=-65.79deg",
+      "LIVE_TURN1: TURN_REACHED, yaw_error=0.68deg",
+      "POST_TURN_CANDIDATES: 316 iteration: 0",
+      "POST_TURN_WAYPOINT: [0.05 1.25] predicted_margin: 0.552m",
+      "POST_TURN_HEADING_CORRECTION: 20.72deg",
+      "LIVE_CORRECTIVE_TURN: turn command=-20.72deg",
+      "LIVE_CORRECTIVE_TURN: TURN_REACHED, yaw_error=1.47deg",
+      "POST_TURN_CANDIDATES: 0 iteration: 1",
+      "Status: TRAJECTORY_OR_GUARD_FAIL",
+      "GATE3_STEP3: FAIL"
+    ],
+    "log_tail": [
+      "LIVE_TURN1: TURN_REACHED, yaw_error=0.68deg",
+      "Live turn 1: TURN_REACHED",
+      "POST_TURN_CANDIDATES: 316 iteration: 0",
+      "POST_TURN_WAYPOINT: [0.05 1.25] predicted_margin: 0.552m",
+      "POST_TURN_HEADING_CORRECTION: 20.72deg",
+      "LIVE_CORRECTIVE_TURN: turn command=-20.72deg",
+      "LIVE_CORRECTIVE_TURN: TURN_REACHED, yaw_error=1.47deg",
+      "POST_TURN_CANDIDATES: 0 iteration: 1",
+      "Trajectory CSV: /home/kato/physical_ai_todai/dog_robot/gate3_avoidance_v01/step4_random_case_07_live_autonomous_route_v3.csv",
+      "",
+      "=== GATE 3 STEP 3 SUMMARY ===",
+      "Status: TRAJECTORY_OR_GUARD_FAIL",
+      "Final XY: [-0.3005  0.3967]",
+      "Trace samples: 3738",
+      "GATE3_STEP3: FAIL",
+      "Report: /home/kato/physical_ai_todai/dog_robot/gate3_avoidance_v01/step4_random_case_07_live_autonomous_route_v3.json",
+      "Simulation only. Full-body safety not certified.",
+      "",
+      "=== GATE 3 STEP 3 DIAGNOSTIC ===",
+      "camera_estimate: minimum=0.5290m at t=55.63000000001001 XY=(-0.29967769953582113,0.41761070845171944)",
+      "extra_box: minimum=0.5582m at t=55.625000000010004 XY=(-0.29949723598514383,0.41806216730548296)",
+      "red_box: minimum=0.5359m at t=55.880000000010135 XY=(-0.30096270621771315,0.39526025765586464)",
+      "Recorded guard violations: 0",
+      "GATE3_STEP3_V3: FAIL"
+    ]
+  }
+]

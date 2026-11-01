@@ -1,0 +1,80 @@
+[
+  {
+    "case": "x_minus_05",
+    "expected": "PASS",
+    "observed": "PASS",
+    "pass": true,
+    "returncode": 0,
+    "observed_points": 585,
+    "trace": {
+      "rows": 12203,
+      "guards": 0,
+      "min_est": 0.5641608253227018
+    }
+  },
+  {
+    "case": "x_plus_05",
+    "expected": "PASS",
+    "observed": "PASS",
+    "pass": true,
+    "returncode": 0,
+    "observed_points": 884,
+    "trace": {
+      "rows": 16362,
+      "guards": 0,
+      "min_est": 0.5681453803817118
+    }
+  },
+  {
+    "case": "y_minus_05",
+    "expected": "PASS",
+    "observed": "PASS",
+    "pass": true,
+    "returncode": 0,
+    "observed_points": 748,
+    "trace": {
+      "rows": 16291,
+      "guards": 0,
+      "min_est": 0.5989941636397647
+    }
+  },
+  {
+    "case": "y_plus_05",
+    "expected": "GOAL_UNSAFE_REJECTED",
+    "observed": "GOAL_UNSAFE_REJECTED",
+    "pass": true,
+    "returncode": 0,
+    "observed_points": 669,
+    "trace": {
+      "rows": 0,
+      "guards": null,
+      "min_est": null
+    }
+  },
+  {
+    "case": "xy_shift",
+    "expected": "GOAL_UNSAFE_REJECTED",
+    "observed": "GOAL_UNSAFE_REJECTED",
+    "pass": true,
+    "returncode": 0,
+    "observed_points": 811,
+    "trace": {
+      "rows": 0,
+      "guards": null,
+      "min_est": null
+    }
+  },
+  {
+    "case": "nan_map_fault",
+    "expected": "GOAL_MAP_INVALID_REJECTED",
+    "observed": "GOAL_MAP_INVALID_REJECTED",
+    "pass": true,
+    "returncode": 0,
+    "observed_points": 702,
+    "trace": {
+      "rows": 0,
+      "guards": null,
+      "min_est": null
+    }
+  }
+]

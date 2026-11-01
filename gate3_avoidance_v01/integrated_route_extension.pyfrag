@@ -1,0 +1,366 @@
+# ===== Integrated camera-derived route trial =====
+import ast
+import csv
+import json
+
+print("\n=== INTEGRATED CAMERA ROUTE TEST ===")
+
+if not passed or stage != "hold":
+    raise RuntimeError("Heading correction must PASS first")
+
+depth_path = (
+    HERE / "../gate3_obstacle_stop_v01/"
+    "obstacle_stop_background_test.py"
+).resolve()
+
+tree = ast.parse(depth_path.read_text())
+funcs = [
+    n for n in tree.body
+    if isinstance(n, ast.FunctionDef)
+    and n.name == "obstacle_distance"
+]
+if len(funcs) != 1:
+    raise RuntimeError("Depth detector unavailable")
+
+ns = {
+    "np": np, "math": math, "mujoco": mujoco,
+    "model": model, "data": data,
+}
+exec(
+    compile(
+        ast.Module(body=funcs, type_ignores=[]),
+        str(depth_path), "exec"
+    ), ns
+)
+detect_depth = ns["obstacle_distance"]
+
+CLEARANCE = 0.521
+WAYPOINT_TOL = 0.11
+FINAL_TOL = 0.11
+MAX_TILT = 12.0
+MIN_HEIGHT = 0.16
+
+waypoint = np.array([-0.25, 1.50])
+final_goal = np.array([-1.10, 1.50])
+results = []
+trace = []
+
+def angle_error(target, current):
+    return (target - current + 180) % 360 - 180
+
+def guard():
+    est = estimated_clearance()
+    extra = xy_clearance(extra_id)
+    red = xy_clearance(box_id)
+    height, tilt = posture()
+
+    collision = False
+    for j in range(data.ncon):
+        c = data.contact[j]
+        if extra_id in (int(c.geom1), int(c.geom2)):
+            collision = True
+        if box_id in (int(c.geom1), int(c.geom2)):
+            collision = True
+
+    if collision:
+        reason = "CONTACT_STOP"
+    elif not np.all(np.isfinite([
+        est, extra, red, height, tilt
+    ])):
+        reason = "STATE_INVALID_STOP"
+    elif min(est, extra, red) < CLEARANCE:
+        reason = "CLEARANCE_STOP"
+    elif height < MIN_HEIGHT or tilt > MAX_TILT:
+        reason = "POSTURE_STOP"
+    else:
+        reason = None
+
+    return reason, est, extra, red, height, tilt
+
+def record(section, reason, depth):
+    state, est, extra, red, height, tilt = guard()
+    trace.append({
+        "section": section,
+        "time_s": float(data.time),
+        "stage": stage,
+        "x_m": float(data.qpos[0]),
+        "y_m": float(data.qpos[1]),
+        "yaw_deg": float(yaw_deg()),
+        "estimated_clearance_m": est,
+        "extra_clearance_m": extra,
+        "red_clearance_m": red,
+        "height_m": height,
+        "tilt_deg": tilt,
+        "depth_m": depth,
+        "guard_reason": state or "",
+        "stop_reason": reason,
+    })
+    return state
+
+def soft_hold(section, reason):
+    global stage, stage_start
+    stage = "stopping"
+    stage_start = float(data.time)
+    start = float(data.time)
+
+    while float(data.time)-start < 2.2:
+        elapsed = float(data.time)-stage_start
+        if stage == "stopping" and elapsed >= 1.0:
+            stage = "hold"
+            stage_start = float(data.time)
+        elif stage == "hold" and elapsed >= 1.0:
+            break
+
+        set_legs(stage, float(data.time)-stage_start)
+        mujoco.mj_step(model, data)
+        record(section, reason, float("nan"))
+
+    return stage == "hold"
+
+def turn_to(section, goal):
+    global stage, stage_start, target_angle
+
+    delta = goal-data.qpos[:2]
+    desired = math.degrees(math.atan2(-delta[1],-delta[0]))
+    initial = yaw_deg()
+    command = angle_error(desired, initial)
+
+    print(f"{section}: turn command={command:+.2f}deg")
+
+    if guard()[0]:
+        return "START_GUARD_STOP"
+
+    if abs(command) <= 2.0:
+        return "TURN_ALREADY_ALIGNED"
+
+    target_angle = command
+    stage = "turn"
+    stage_start = float(data.time)
+    beginning = float(data.time)
+    reason = "TURN_TIMEOUT"
+
+    while float(data.time)-beginning < 30:
+        actual = angle_error(yaw_deg(), initial)
+
+        if abs(command)-abs(actual) <= 1.5:
+            reason = "TURN_REACHED"
+            break
+
+        set_legs("turn", float(data.time)-stage_start)
+        mujoco.mj_step(model,data)
+        failure = record(section, "", float("nan"))
+        if failure:
+            reason = failure
+            break
+
+    soft_hold(section, reason)
+    final_error = abs(angle_error(desired,yaw_deg()))
+
+    if reason == "TURN_REACHED" and final_error > 5.0:
+        reason = "TURN_ACCURACY_FAIL"
+
+    if guard()[0]:
+        reason = guard()[0]
+
+    print(
+        f"{section}: {reason}, "
+        f"yaw_error={final_error:.2f}deg"
+    )
+    return reason
+
+def walk_to(section, goal, renderer, timeout=28):
+    global stage, stage_start
+
+    if guard()[0]:
+        return "START_GUARD_STOP"
+
+    start_xy = data.qpos[:2].copy()
+    start_yaw = yaw_deg()
+    heading = math.radians(start_yaw)
+    direction = np.array([
+        -math.cos(heading),-math.sin(heading)
+    ])
+    initial_goal_distance = float(np.linalg.norm(goal-start_xy))
+
+    stage = "walk"
+    stage_start = float(data.time)
+    beginning = float(data.time)
+    last_depth = -1e9
+    nearest = float("nan")
+    reason = "WALK_TIMEOUT"
+
+    while float(data.time)-beginning < timeout:
+        t = float(data.time)
+        xy = data.qpos[:2].copy()
+        displacement = xy-start_xy
+        forward = float(np.dot(displacement,direction))
+        lateral = abs(float(
+            direction[0]*displacement[1]
+            -direction[1]*displacement[0]
+        ))
+        error = float(np.linalg.norm(goal-xy))
+
+        if t-last_depth >= 0.40:
+            last_depth = t
+            try:
+                nearest = float(detect_depth(renderer))
+            except Exception as exc:
+                print("Depth exception:",repr(exc))
+                nearest = float("nan")
+
+        failure = guard()[0]
+        if failure:
+            reason = failure
+            break
+        if not math.isfinite(nearest):
+            reason = "DEPTH_SENSOR_STOP"
+            break
+        if nearest < 0.55:
+            reason = "DEPTH_OBSTACLE_STOP"
+            break
+        if lateral > 0.08:
+            reason = "PATH_DEVIATION_STOP"
+            break
+        if abs(angle_error(start_yaw,yaw_deg())) > 10:
+            reason = "HEADING_STOP"
+            break
+        if error <= (
+            FINAL_TOL if section == "FINAL_WALK"
+            else WAYPOINT_TOL
+        ):
+            reason = "GOAL_TRIGGERED"
+            break
+        if forward > initial_goal_distance+0.10:
+            reason = "DISTANCE_LIMIT_STOP"
+            break
+
+        set_legs("walk",t-stage_start)
+        mujoco.mj_step(model,data)
+        failure = record(section,"",nearest)
+        if failure:
+            reason = failure
+            break
+
+    soft_hold(section,reason)
+    final_error = float(np.linalg.norm(goal-data.qpos[:2]))
+
+    if reason == "GOAL_TRIGGERED" and final_error > 0.15:
+        reason = "FINAL_ACCURACY_FAIL"
+    if guard()[0]:
+        reason = guard()[0]
+
+    print(
+        f"{section}: {reason}, "
+        f"goal_error={final_error:.3f}m, "
+        f"final_xy={np.round(data.qpos[:2],4)}"
+    )
+    return reason
+
+def accept(section, reason, valid):
+    results.append({
+        "section": section,
+        "reason": reason,
+        "pass": bool(valid),
+        "xy": [float(v) for v in data.qpos[:2]],
+    })
+    return bool(valid)
+
+with mujoco.Renderer(model,width=640,height=360) as renderer:
+    reason1 = walk_to("WAYPOINT_WALK",waypoint,renderer)
+    ok1 = accept(
+        "WAYPOINT_WALK",reason1,
+        reason1 == "GOAL_TRIGGERED"
+        and stage == "hold"
+    )
+
+    if ok1:
+        reason2 = turn_to("FINAL_TURN",final_goal)
+        ok2 = accept(
+            "FINAL_TURN",reason2,
+            reason2 in ("TURN_REACHED","TURN_ALREADY_ALIGNED")
+            and stage == "hold"
+        )
+    else:
+        ok2 = False
+
+    if ok2:
+        reason3 = walk_to("FINAL_WALK",final_goal,renderer)
+        ok3 = accept(
+            "FINAL_WALK",reason3,
+            reason3 == "GOAL_TRIGGERED"
+            and stage == "hold"
+        )
+    else:
+        ok3 = False
+
+csv_path = HERE/"integrated_camera_route.csv"
+json_path = HERE/"integrated_camera_result.json"
+
+with csv_path.open("w",newline="") as f:
+    writer = csv.DictWriter(f,fieldnames=list(trace[0]))
+    writer.writeheader()
+    writer.writerows(trace)
+
+valid_clearance = all(
+    min(
+        r["estimated_clearance_m"],
+        r["extra_clearance_m"],
+        r["red_clearance_m"]
+    ) >= CLEARANCE
+    for r in trace
+)
+valid_posture = all(
+    r["height_m"] >= MIN_HEIGHT
+    and r["tilt_deg"] <= MAX_TILT
+    for r in trace
+)
+no_contacts = all(
+    r["guard_reason"] != "CONTACT_STOP"
+    for r in trace
+)
+overall = (
+    ok1 and ok2 and ok3
+    and valid_clearance and valid_posture
+    and no_contacts
+)
+summary = {
+    "segments":results,
+    "overall_pass":bool(overall),
+    "trace_samples":len(trace),
+    "min_estimated_clearance_m":float(min(
+        r["estimated_clearance_m"] for r in trace
+    )),
+    "min_extra_clearance_m":float(min(
+        r["extra_clearance_m"] for r in trace
+    )),
+    "max_tilt_deg":float(max(
+        r["tilt_deg"] for r in trace
+    )),
+    "final_xy":[float(v) for v in data.qpos[:2]],
+    "final_error_m":float(np.linalg.norm(
+        data.qpos[:2]-final_goal
+    )),
+}
+json_path.write_text(json.dumps(summary,indent=2))
+
+print("\n=== INTEGRATED ROUTE SUMMARY ===")
+for item in results:
+    print(
+        item["section"],
+        "PASS" if item["pass"] else "FAIL",
+        item["reason"]
+    )
+print("Trace samples:",len(trace))
+print("Final error:",f'{summary["final_error_m"]:.3f}m')
+print("Min estimated clearance:",
+      f'{summary["min_estimated_clearance_m"]:.3f}m')
+print("Min extra clearance:",
+      f'{summary["min_extra_clearance_m"]:.3f}m')
+print("Max tilt:",f'{summary["max_tilt_deg"]:.2f}deg')
+print("CSV:",csv_path)
+print("JSON:",json_path)
+print(
+    "INTEGRATED_CAMERA_ROUTE:",
+    "PASS" if overall else "FAIL"
+)
+print("Offline camera planning; simulation only.")

@@ -1,0 +1,95 @@
+<mujoco model="soft_companion_quadruped_v02">
+  <asset>
+    <texture name="person_photo" type="2d" file="/home/kato/physical_ai_todai/dog_robot/gate3_person_vision_v01/person_poster.png" />
+    <material name="person_poster_material" texture="person_photo" rgba="1 1 1 1" specular="0" />
+  </asset>
+  <compiler angle="degree" autolimits="true" />
+  <option timestep="0.005" gravity="0 0 -9.81" integrator="implicitfast" />
+  <default>
+    <joint damping="0.15" armature="0.002" />
+    <geom friction="1.2 0.01 0.001" condim="3" />
+  </default>
+  <contact>
+    <exclude body1="torso" body2="head" />
+  </contact>
+  <worldbody>
+    <light pos="0 -0.8 1.5" dir="0 0 -1" />
+    <geom name="floor" type="plane" size="2 2 0.1" rgba="0.86 0.88 0.9 1" />
+    <body name="torso" pos="0 0 0.245">
+      <freejoint name="root" />
+      <geom name="torso_geom" type="box" size="0.155 0.085 0.047" mass="0.75" rgba="0.69 0.46 0.27 1" />
+      <body name="front_left_upper" pos="-0.112 0.075 -0.022">
+        <joint name="front_left_hip" type="hinge" axis="0 1 0" range="-48 48" />
+        <geom type="capsule" fromto="0 0 0 0 0 -0.087" size="0.019" mass="0.065" rgba="0.75 0.52 0.34 1" />
+        <body name="front_left_lower" pos="0 0 -0.087">
+          <joint name="front_left_knee" type="hinge" axis="0 1 0" range="-85 15" />
+          <geom type="capsule" fromto="0 0 0 0 0 -0.087" size="0.016" mass="0.055" rgba="0.78 0.57 0.38 1" />
+          <geom name="front_left_foot" type="sphere" pos="-0.011 0 -0.087" size="0.023" mass="0.018" rgba="0.23 0.19 0.17 1" />
+        </body>
+      </body>
+      <body name="front_right_upper" pos="-0.112 -0.075 -0.022">
+        <joint name="front_right_hip" type="hinge" axis="0 1 0" range="-48 48" />
+        <geom type="capsule" fromto="0 0 0 0 0 -0.087" size="0.019" mass="0.065" rgba="0.75 0.52 0.34 1" />
+        <body name="front_right_lower" pos="0 0 -0.087">
+          <joint name="front_right_knee" type="hinge" axis="0 1 0" range="-85 15" />
+          <geom type="capsule" fromto="0 0 0 0 0 -0.087" size="0.016" mass="0.055" rgba="0.78 0.57 0.38 1" />
+          <geom name="front_right_foot" type="sphere" pos="-0.011 0 -0.087" size="0.023" mass="0.018" rgba="0.23 0.19 0.17 1" />
+        </body>
+      </body>
+      <body name="hind_left_upper" pos="0.112 0.075 -0.022">
+        <joint name="hind_left_hip" type="hinge" axis="0 1 0" range="-48 48" />
+        <geom type="capsule" fromto="0 0 0 0 0 -0.087" size="0.019" mass="0.065" rgba="0.75 0.52 0.34 1" />
+        <body name="hind_left_lower" pos="0 0 -0.087">
+          <joint name="hind_left_knee" type="hinge" axis="0 1 0" range="-85 15" />
+          <geom type="capsule" fromto="0 0 0 0 0 -0.087" size="0.016" mass="0.055" rgba="0.78 0.57 0.38 1" />
+          <geom name="hind_left_foot" type="sphere" pos="-0.011 0 -0.087" size="0.023" mass="0.018" rgba="0.23 0.19 0.17 1" />
+        </body>
+      </body>
+      <body name="hind_right_upper" pos="0.112 -0.075 -0.022">
+        <joint name="hind_right_hip" type="hinge" axis="0 1 0" range="-48 48" />
+        <geom type="capsule" fromto="0 0 0 0 0 -0.087" size="0.019" mass="0.065" rgba="0.75 0.52 0.34 1" />
+        <body name="hind_right_lower" pos="0 0 -0.087">
+          <joint name="hind_right_knee" type="hinge" axis="0 1 0" range="-85 15" />
+          <geom type="capsule" fromto="0 0 0 0 0 -0.087" size="0.016" mass="0.055" rgba="0.78 0.57 0.38 1" />
+          <geom name="hind_right_foot" type="sphere" pos="-0.011 0 -0.087" size="0.023" mass="0.018" rgba="0.23 0.19 0.17 1" />
+        </body>
+      </body>
+      <body name="neck_yaw_link" pos="-0.145 0 0.039">
+        <inertial pos="0 0 0" mass="0.02" diaginertia="0.00002 0.00002 0.00002" />
+        <joint name="neck_yaw" type="hinge" axis="0 0 1" range="-35 35" />
+        <body name="head" pos="-0.061 0 0.027">
+          <joint name="neck_pitch" type="hinge" axis="0 1 0" range="-22 22" />
+          <geom type="ellipsoid" size="0.065 0.065 0.061" mass="0.12" rgba="0.82 0.62 0.42 1" />
+          <geom type="sphere" pos="-0.060 0 -0.017" size="0.025" mass="0.012" rgba="0.94 0.8 0.6 1" />
+          <geom type="ellipsoid" pos="0 -0.05 0.055" size="0.02 0.018 0.044" mass="0.01" rgba="0.56 0.36 0.22 1" />
+          <geom type="ellipsoid" pos="0 0.05 0.055" size="0.02 0.018 0.044" mass="0.01" rgba="0.56 0.36 0.22 1" />
+          <camera name="dog_eye" pos="-0.095 0 0.015" xyaxes="0 1 0 0 0 1" fovy="75" />
+        </body>
+      </body>
+      <body name="tail" pos="0.15 0 0.036">
+        <joint name="tail_yaw" type="hinge" axis="0 0 1" range="-40 40" />
+        <geom type="capsule" fromto="0 0 0 0.09 0 0.043" size="0.017" mass="0.035" rgba="0.79 0.56 0.34 1" />
+      </body>
+      <body name="breathing_chest" pos="-0.050 0 0.048">
+        <joint name="chest_expand" type="slide" axis="0 0 1" range="0 0.007" damping="1" />
+        <geom type="ellipsoid" size="0.08 0.07 0.01" mass="0.014" contype="0" conaffinity="0" rgba="0.93 0.76 0.55 0.8" />
+      </body>
+    </body>
+    <geom name="person_poster_board" type="box" pos="-1.65 0.48 0.32" size="0.005 0.23 0.30" material="person_poster_material" contype="0" conaffinity="0" />
+    <geom name="blocking_box" type="box" pos="-0.90 0.10 0.14" size="0.10 0.10 0.14" rgba="0.9 0.2 0.15 1" contype="1" conaffinity="1" />
+  <geom name="extra_blocking_box" type="box" pos="-0.95000000 0.70000000 0.14000000" size="0.08 0.08 0.14" rgba="1 0.5 0.1 1" contype="1" conaffinity="1" /></worldbody>
+  <actuator>
+    <position name="front_left_hip_drive" joint="front_left_hip" kp="15" kv="1.2" forcelimited="true" forcerange="-3 3" inheritrange="1" />
+    <position name="front_left_knee_drive" joint="front_left_knee" kp="12" kv="1.2" forcelimited="true" forcerange="-3 3" inheritrange="1" />
+    <position name="front_right_hip_drive" joint="front_right_hip" kp="15" kv="1.2" forcelimited="true" forcerange="-3 3" inheritrange="1" />
+    <position name="front_right_knee_drive" joint="front_right_knee" kp="12" kv="1.2" forcelimited="true" forcerange="-3 3" inheritrange="1" />
+    <position name="hind_left_hip_drive" joint="hind_left_hip" kp="15" kv="1.2" forcelimited="true" forcerange="-3 3" inheritrange="1" />
+    <position name="hind_left_knee_drive" joint="hind_left_knee" kp="12" kv="1.2" forcelimited="true" forcerange="-3 3" inheritrange="1" />
+    <position name="hind_right_hip_drive" joint="hind_right_hip" kp="15" kv="1.2" forcelimited="true" forcerange="-3 3" inheritrange="1" />
+    <position name="hind_right_knee_drive" joint="hind_right_knee" kp="12" kv="1.2" forcelimited="true" forcerange="-3 3" inheritrange="1" />
+    <position name="neck_yaw_drive" joint="neck_yaw" kp="4" kv="0.5" ctrllimited="true" ctrlrange="-0.6 0.6" />
+    <position name="neck_pitch_drive" joint="neck_pitch" kp="4" kv="0.5" ctrllimited="true" ctrlrange="-0.38 0.38" />
+    <position name="tail_yaw_drive" joint="tail_yaw" kp="2" kv="0.5" ctrllimited="true" ctrlrange="-0.65 0.65" />
+    <position name="chest_expand_drive" joint="chest_expand" kp="80" kv="2" ctrllimited="true" ctrlrange="0 0.007" />
+  </actuator>
+</mujoco>

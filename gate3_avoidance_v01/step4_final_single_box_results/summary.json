@@ -1,0 +1,224 @@
+[
+  {
+    "case": "case_00",
+    "expected": "ARRIVAL_OR_PREFLIGHT_REFUSAL",
+    "observed": "PASS",
+    "goal_clearance_m": 0.653160291011444,
+    "goal_error_m": 0.11280688293588542,
+    "arrival_pass": true,
+    "rejection_pass": false,
+    "preflight_refusal": false,
+    "pass": true,
+    "return_code": 0,
+    "trace": {
+      "rows": 12565,
+      "min_est": 0.6411887171546198,
+      "min_extra": 0.6567617586113081,
+      "min_red": 0.5884769097782939,
+      "min_height": 0.21000563628464045,
+      "max_tilt": 3.617836369600017,
+      "guard_events": 0,
+      "valid": true
+    }
+  },
+  {
+    "case": "case_01",
+    "expected": "GOAL_UNSAFE_REJECTED",
+    "observed": "GOAL_UNSAFE_REJECTED",
+    "goal_clearance_m": 0.49028628827250254,
+    "goal_error_m": 1.4203474974586807,
+    "arrival_pass": false,
+    "rejection_pass": true,
+    "preflight_refusal": false,
+    "pass": true,
+    "return_code": 0,
+    "trace": {
+      "rows": 0,
+      "valid": false
+    }
+  },
+  {
+    "case": "case_02",
+    "expected": "ARRIVAL_OR_PREFLIGHT_REFUSAL",
+    "observed": "PASS",
+    "goal_clearance_m": 0.6604338770694411,
+    "goal_error_m": 0.1100730383476741,
+    "arrival_pass": true,
+    "rejection_pass": false,
+    "preflight_refusal": false,
+    "pass": true,
+    "return_code": 0,
+    "trace": {
+      "rows": 17355,
+      "min_est": 0.5852040919819764,
+      "min_extra": 0.6180091685123761,
+      "min_red": 0.5483220505992306,
+      "min_height": 0.2100063597182505,
+      "max_tilt": 3.645686860954952,
+      "guard_events": 0,
+      "valid": true
+    }
+  },
+  {
+    "case": "case_03",
+    "expected": "GOAL_UNSAFE_REJECTED",
+    "observed": "GOAL_UNSAFE_REJECTED",
+    "goal_clearance_m": 0.493009660961315,
+    "goal_error_m": 1.4908646590687948,
+    "arrival_pass": false,
+    "rejection_pass": true,
+    "preflight_refusal": false,
+    "pass": true,
+    "return_code": 0,
+    "trace": {
+      "rows": 0,
+      "valid": false
+    }
+  },
+  {
+    "case": "case_04",
+    "expected": "GOAL_UNSAFE_REJECTED",
+    "observed": "GOAL_UNSAFE_REJECTED",
+    "goal_clearance_m": 0.480365906025499,
+    "goal_error_m": 1.4908646590687948,
+    "arrival_pass": false,
+    "rejection_pass": true,
+    "preflight_refusal": false,
+    "pass": true,
+    "return_code": 0,
+    "trace": {
+      "rows": 0,
+      "valid": false
+    }
+  },
+  {
+    "case": "case_05",
+    "expected": "ARRIVAL_OR_PREFLIGHT_REFUSAL",
+    "observed": "PASS",
+    "goal_clearance_m": 0.5545229670157739,
+    "goal_error_m": 0.10151946028494427,
+    "arrival_pass": true,
+    "rejection_pass": false,
+    "preflight_refusal": false,
+    "pass": true,
+    "return_code": 0,
+    "trace": {
+      "rows": 12328,
+      "min_est": 0.5467756944383562,
+      "min_extra": 0.5621933353365137,
+      "min_red": 0.5900021726186153,
+      "min_height": 0.21000518585560388,
+      "max_tilt": 3.600277991681891,
+      "guard_events": 0,
+      "valid": true
+    }
+  },
+  {
+    "case": "case_06",
+    "expected": "ARRIVAL_OR_PREFLIGHT_REFUSAL",
+    "observed": "PASS",
+    "goal_clearance_m": 0.6677256974269541,
+    "goal_error_m": 0.10874657246049768,
+    "arrival_pass": true,
+    "rejection_pass": false,
+    "preflight_refusal": false,
+    "pass": true,
+    "return_code": 0,
+    "trace": {
+      "rows": 12963,
+      "min_est": 0.6703909232401983,
+      "min_extra": 0.6840533296000825,
+      "min_red": 0.5836121207172669,
+      "min_height": 0.21000528991472991,
+      "max_tilt": 3.64281597488982,
+      "guard_events": 0,
+      "valid": true
+    }
+  },
+  {
+    "case": "case_07",
+    "expected": "ARRIVAL_OR_PREFLIGHT_REFUSAL",
+    "observed": "PASS",
+    "goal_clearance_m": 0.6325212002322134,
+    "goal_error_m": 0.1154458833705365,
+    "arrival_pass": true,
+    "rejection_pass": false,
+    "preflight_refusal": false,
+    "pass": true,
+    "return_code": 0,
+    "trace": {
+      "rows": 18243,
+      "min_est": 0.6030626212579969,
+      "min_extra": 0.6367591694991501,
+      "min_red": 0.5520207047042494,
+      "min_height": 0.21000516232296135,
+      "max_tilt": 3.663162792211642,
+      "guard_events": 0,
+      "valid": true
+    }
+  },
+  {
+    "case": "case_08",
+    "expected": "GOAL_UNSAFE_REJECTED",
+    "observed": "GOAL_UNSAFE_REJECTED",
+    "goal_clearance_m": 0.49329334075516734,
+    "goal_error_m": 1.4908646590687948,
+    "arrival_pass": false,
+    "rejection_pass": true,
+    "preflight_refusal": false,
+    "pass": true,
+    "return_code": 0,
+    "trace": {
+      "rows": 0,
+      "valid": false
+    }
+  },
+  {
+    "case": "case_09",
+    "expected": "GOAL_UNSAFE_REJECTED",
+    "observed": "GOAL_UNSAFE_REJECTED",
+    "goal_clearance_m": 0.47748687515712174,
+    "goal_error_m": 1.4908646590687948,
+    "arrival_pass": false,
+    "rejection_pass": true,
+    "preflight_refusal": false,
+    "pass": true,
+    "return_code": 0,
+    "trace": {
+      "rows": 0,
+      "valid": false
+    }
+  },
+  {
+    "case": "case_10",
+    "expected": "GOAL_UNSAFE_REJECTED",
+    "observed": "GOAL_UNSAFE_REJECTED",
+    "goal_clearance_m": 0.49266104480357753,
+    "goal_error_m": 1.4908646590687948,
+    "arrival_pass": false,
+    "rejection_pass": true,
+    "preflight_refusal": false,
+    "pass": true,
+    "return_code": 0,
+    "trace": {
+      "rows": 0,
+      "valid": false
+    }
+  },
+  {
+    "case": "case_11",
+    "expected": "GOAL_UNSAFE_REJECTED",
+    "observed": "GOAL_UNSAFE_REJECTED",
+    "goal_clearance_m": 0.5302545521444155,
+    "goal_error_m": 1.4908646590687948,
+    "arrival_pass": false,
+    "rejection_pass": true,
+    "preflight_refusal": false,
+    "pass": true,
+    "return_code": 0,
+    "trace": {
+      "rows": 0,
+      "valid": false
+    }
+  }
+]

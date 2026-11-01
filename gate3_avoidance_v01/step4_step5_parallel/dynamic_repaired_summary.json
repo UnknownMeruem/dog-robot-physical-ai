@@ -1,0 +1,18 @@
+{
+  "exit_code": 0,
+  "stage2_depth_stop": true,
+  "dynamic_appeared": true,
+  "waypoint_walk_stop_reason": "DEPTH_OBSTACLE_STOP",
+  "trace_rows": 6035,
+  "post_spawn_rows": 645,
+  "minimum_dynamic_clearance_m": 0.544614465280863,
+  "minimum_estimated_clearance_m": 0.5852040919819764,
+  "minimum_height_m": 0.21001326086091715,
+  "maximum_tilt_deg": 3.645686860954952,
+  "contact_samples": 0,
+  "guard_samples": 0,
+  "dynamic_stop_pass": true,
+  "reobservation_replan_resume_pass": false,
+  "full_body_independent_audit_pass": false,
+  "reported_stage3_status": "TRAJECTORY_OR_GUARD_FAIL"
+}

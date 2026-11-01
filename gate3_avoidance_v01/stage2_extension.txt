@@ -1,0 +1,183 @@
+
+# ===== Stage 2: turn toward waypoint 2, then walk 20cm =====
+print("\n=== Stage 2: dynamic heading and short walk ===")
+waypoint2 = np.array([-1.10, 0.80])
+position1 = data.qpos[:2].copy()
+error1 = float(np.linalg.norm(position1 - target_xy))
+
+if (
+    stop_reason != "WAYPOINT1_REACHED"
+    or error1 > 0.08
+    or box_contacts != 0
+):
+    print("STAGE2_NOT_STARTED: waypoint 1 acceptance failed")
+else:
+    delta = waypoint2 - position1
+    desired_yaw = math.degrees(
+        math.atan2(-delta[1], -delta[0])
+    )
+    current_yaw = yaw_deg()
+    relative_turn = (
+        (desired_yaw - current_yaw + 180) % 360
+    ) - 180
+
+    # set_legs() uses target_angle to choose turn direction.
+    saved_target_angle = target_angle
+    target_angle = relative_turn
+
+    print("Start XY:", np.round(position1, 4))
+    print("Waypoint 2:", waypoint2)
+    print("Current yaw:", f"{current_yaw:+.2f}deg")
+    print("Desired yaw:", f"{desired_yaw:+.2f}deg")
+    print("Turn command:", f"{relative_turn:+.2f}deg")
+
+    stage = "turn"
+    stage_start = float(data.time)
+    turn_start_yaw = current_yaw
+    reason2 = ""
+    max_tilt2 = 0.0
+    contact2 = 0
+    stage2_rows = []
+
+    def inspect_step():
+        global contact2, max_tilt2, reason2, stage, stage_start
+        height, tilt = posture()
+        max_tilt2 = max(max_tilt2, tilt)
+
+        if height < 0.16 or tilt > 12.0:
+            if stage not in ("stopping", "hold"):
+                reason2 = "POSTURE_STOP"
+                stage = "stopping"
+                stage_start = float(data.time)
+
+        for ci in range(data.ncon):
+            c = data.contact[ci]
+            if box_id in (int(c.geom1), int(c.geom2)):
+                contact2 += 1
+                if stage not in ("stopping", "hold"):
+                    reason2 = "BOX_CONTACT_STOP"
+                    stage = "stopping"
+                    stage_start = float(data.time)
+
+        stage2_rows.append({
+            "time_s": float(data.time),
+            "stage": stage,
+            "x_m": float(data.qpos[0]),
+            "y_m": float(data.qpos[1]),
+            "yaw_deg": yaw_deg(),
+            "height_m": height,
+            "tilt_deg": tilt,
+            "box_contacts_total": contact2,
+        })
+
+    # Turning, with feedback and soft stopping
+    while data.time - stage_start < 20.0:
+        t = float(data.time)
+        elapsed = t - stage_start
+
+        if stage == "turn":
+            actual = (
+                (yaw_deg() - turn_start_yaw + 180) % 360
+            ) - 180
+            threshold = max(0.0, abs(relative_turn) - 1.5)
+            reached = (
+                actual >= threshold
+                if relative_turn >= 0
+                else actual <= -threshold
+            )
+            if reached or elapsed >= 16.0:
+                reason2 = (
+                    "TURN2_REACHED" if reached else "TURN2_TIMEOUT"
+                )
+                stage = "stopping"
+                stage_start = t
+                print(
+                    f"Stage 2 turn stop: yaw_change={actual:+.2f}deg "
+                    f"reason={reason2}"
+                )
+
+        elif stage == "stopping" and elapsed >= 1.0:
+            stage = "hold"
+            stage_start = t
+
+        elif stage == "hold" and elapsed >= 1.0:
+            break
+
+        set_legs(stage, t - stage_start)
+        mujoco.mj_step(model, data)
+        inspect_step()
+
+    print("Yaw after turn:", f"{yaw_deg():+.2f}deg")
+
+    if reason2 == "TURN2_REACHED" and contact2 == 0:
+        stage = "walk"
+        stage_start = float(data.time)
+        walk2_start_time = float(data.time)
+        walk2_start_xy = data.qpos[:2].copy()
+        heading = math.radians(yaw_deg())
+        walk2_dir = np.array([
+            -math.cos(heading), -math.sin(heading)
+        ])
+
+        while data.time - walk2_start_time < 7.0:
+            t = float(data.time)
+            displacement = data.qpos[:2] - walk2_start_xy
+            forward2 = float(np.dot(displacement, walk2_dir))
+            lateral2 = abs(float(np.linalg.det(
+                np.column_stack((walk2_dir, displacement))
+            )))
+
+            if stage == "walk":
+                if forward2 >= 0.20:
+                    reason2 = "WALK2_20CM_REACHED"
+                elif lateral2 > 0.08:
+                    reason2 = "PATH_DEVIATION_STOP"
+                elif abs((
+                    (yaw_deg() - desired_yaw + 180) % 360
+                ) - 180) > 10.0:
+                    reason2 = "HEADING_DEVIATION_STOP"
+                elif t - walk2_start_time >= 6.0:
+                    reason2 = "WALK2_TIMEOUT"
+
+                if reason2 != "TURN2_REACHED":
+                    stage = "stopping"
+                    stage_start = t
+                    print(
+                        f"Stage 2 walk stop: "
+                        f"distance={forward2:.3f}m "
+                        f"reason={reason2}"
+                    )
+
+            elif stage == "stopping" and t - stage_start >= 1.0:
+                stage = "hold"
+                stage_start = t
+
+            elif stage == "hold" and t - stage_start >= 1.0:
+                break
+
+            set_legs(stage, t - stage_start)
+            mujoco.mj_step(model, data)
+            inspect_step()
+
+    result2 = HERE / "stage2_trial.csv"
+    with result2.open("w", newline="") as f:
+        writer = csv.DictWriter(
+            f, fieldnames=list(stage2_rows[0])
+        )
+        writer.writeheader()
+        writer.writerows(stage2_rows)
+
+    print("\n=== Stage 2 Result ===")
+    print("Final XY:", np.round(data.qpos[:2], 4))
+    print("Final yaw:", f"{yaw_deg():+.2f}deg")
+    print("Distance to waypoint 2:",
+          f"{np.linalg.norm(data.qpos[:2]-waypoint2):.3f}m")
+    print("Final stage:", stage)
+    print("Stop reason:", reason2)
+    print("Maximum tilt:", f"{max_tilt2:.2f}deg")
+    print("Box contact samples:", contact2)
+    print("CSV:", result2)
+
+    target_angle = saved_target_angle
+
+print("Stage 2 is exploratory simulation, not hardware-safe.")

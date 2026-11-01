@@ -1,0 +1,62 @@
+[
+  {
+    "case": "case_02_52cm",
+    "pass": true,
+    "error_m": 0.1100730383476741,
+    "trace": {
+      "rows": 17355,
+      "min_est": 0.5852040919819764,
+      "min_extra": 0.6180091685123761,
+      "min_red": 0.5483220505992306,
+      "min_height": 0.2100063597182505,
+      "max_tilt": 3.645686860954952,
+      "guard_events": 0,
+      "valid": true
+    }
+  },
+  {
+    "case": "case_02_60cm",
+    "pass": true,
+    "error_m": 0.10344248564558196,
+    "trace": {
+      "rows": 19683,
+      "min_est": 0.6387780081596908,
+      "min_extra": 0.6744537061249358,
+      "min_red": 0.560335261992311,
+      "min_height": 0.2100052537511024,
+      "max_tilt": 3.77875740782626,
+      "guard_events": 0,
+      "valid": true
+    }
+  },
+  {
+    "case": "case_07_52cm",
+    "pass": true,
+    "error_m": 0.1154458833705365,
+    "trace": {
+      "rows": 18243,
+      "min_est": 0.6030626212579969,
+      "min_extra": 0.6367591694991501,
+      "min_red": 0.5520207047042494,
+      "min_height": 0.21000516232296135,
+      "max_tilt": 3.663162792211642,
+      "guard_events": 0,
+      "valid": true
+    }
+  },
+  {
+    "case": "case_07_60cm",
+    "pass": true,
+    "error_m": 0.11621853860215246,
+    "trace": {
+      "rows": 14903,
+      "min_est": 0.621861153271498,
+      "min_extra": 0.6383953419653382,
+      "min_red": 0.586580546475983,
+      "min_height": 0.21000511801565652,
+      "max_tilt": 3.6218834357823537,
+      "guard_events": 0,
+      "valid": true
+    }
+  }
+]

@@ -1,0 +1,42 @@
+[
+  {
+    "case": "case_02_52cm",
+    "first_stop_tolerance_m": 0.52,
+    "status": "PASS",
+    "outcome": "ARRIVAL_REPORTED_NEEDS_TRACE_AUDIT",
+    "exit_code": 0,
+    "observed_points": 748,
+    "trace_samples": 17355,
+    "log": "../gate3_avoidance_v01/step4_early_staging_results/case_02_52cm.log"
+  },
+  {
+    "case": "case_02_60cm",
+    "first_stop_tolerance_m": 0.6,
+    "status": "PASS",
+    "outcome": "ARRIVAL_REPORTED_NEEDS_TRACE_AUDIT",
+    "exit_code": 0,
+    "observed_points": 619,
+    "trace_samples": 19683,
+    "log": "../gate3_avoidance_v01/step4_early_staging_results/case_02_60cm.log"
+  },
+  {
+    "case": "case_07_52cm",
+    "first_stop_tolerance_m": 0.52,
+    "status": "PASS",
+    "outcome": "ARRIVAL_REPORTED_NEEDS_TRACE_AUDIT",
+    "exit_code": 0,
+    "observed_points": 724,
+    "trace_samples": 18243,
+    "log": "../gate3_avoidance_v01/step4_early_staging_results/case_07_52cm.log"
+  },
+  {
+    "case": "case_07_60cm",
+    "first_stop_tolerance_m": 0.6,
+    "status": "PASS",
+    "outcome": "ARRIVAL_REPORTED_NEEDS_TRACE_AUDIT",
+    "exit_code": 0,
+    "observed_points": 592,
+    "trace_samples": 14903,
+    "log": "../gate3_avoidance_v01/step4_early_staging_results/case_07_60cm.log"
+  }
+]

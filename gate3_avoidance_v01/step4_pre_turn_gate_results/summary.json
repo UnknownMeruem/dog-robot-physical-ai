@@ -1,0 +1,54 @@
+[
+  {
+    "case": "case_00",
+    "outcome": "ARRIVAL_PASS",
+    "status": "PASS",
+    "return_code": 0,
+    "trace": {
+      "rows": 12849,
+      "guards": 0,
+      "minimum": 0.6417927281355322
+    },
+    "preflight_refusal": false,
+    "arrival_pass": true
+  },
+  {
+    "case": "case_02",
+    "outcome": "PREFLIGHT_REFUSAL",
+    "status": "TRAJECTORY_OR_GUARD_FAIL",
+    "return_code": 0,
+    "trace": {
+      "rows": 0,
+      "guards": 0,
+      "minimum": null
+    },
+    "preflight_refusal": true,
+    "arrival_pass": false
+  },
+  {
+    "case": "case_06",
+    "outcome": "ARRIVAL_PASS",
+    "status": "PASS",
+    "return_code": 0,
+    "trace": {
+      "rows": 14033,
+      "guards": 0,
+      "minimum": 0.6610737525078905
+    },
+    "preflight_refusal": false,
+    "arrival_pass": true
+  },
+  {
+    "case": "case_07",
+    "outcome": "PREFLIGHT_REFUSAL",
+    "status": "TRAJECTORY_OR_GUARD_FAIL",
+    "return_code": 0,
+    "trace": {
+      "rows": 0,
+      "guards": 0,
+      "minimum": null
+    },
+    "preflight_refusal": true,
+    "arrival_pass": false
+  }
+]

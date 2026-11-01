@@ -1,0 +1,96 @@
+{
+  "exit_code": 0,
+  "recovery": {
+    "new_obstacle_spawned": true,
+    "reobservation_valid": true,
+    "fresh_depth_m": 0.6162139509810901,
+    "map_type": "hybrid_depth_and_mujoco_geometry",
+    "planner_result": "PLANNED",
+    "outcome": "TURN_RESERVE_STOP",
+    "replan_attempts": 2,
+    "turn_attempts": 1,
+    "walk_attempts": 0,
+    "waypoints_completed": 0,
+    "events": [
+      {
+        "event": "REOBSERVED",
+        "time_s": 67.85500000001078,
+        "xy": [
+          -0.152917306738476,
+          0.5040868180790886
+        ],
+        "depth_m": 0.6162139509810901
+      },
+      {
+        "event": "REPLAN",
+        "time_s": 67.85500000001078,
+        "xy": [
+          -0.152917306738476,
+          0.5040868180790886
+        ],
+        "decision": "PLANNED",
+        "remaining_m": 1.374339366313625,
+        "nodes": 72
+      },
+      {
+        "event": "TURN_COMPLETED",
+        "time_s": 81.40999999999845,
+        "xy": [
+          -0.1680702175525575,
+          0.5675934729664808
+        ],
+        "result": "TURN_REACHED",
+        "waypoint": [
+          0.3500000000000001,
+          0.45000000000000007
+        ]
+      },
+      {
+        "event": "POST_TURN_ROUTE_INVALID",
+        "time_s": 81.40999999999845,
+        "xy": [
+          -0.1680702175525575,
+          0.5675934729664808
+        ],
+        "waypoint": [
+          0.3500000000000001,
+          0.45000000000000007
+        ]
+      },
+      {
+        "event": "REPLAN",
+        "time_s": 81.40999999999845,
+        "xy": [
+          -0.1680702175525575,
+          0.5675934729664808
+        ],
+        "decision": "PLANNED",
+        "remaining_m": 1.3182848899487722,
+        "nodes": 72
+      }
+    ],
+    "reserve_diagnostics": {
+      "estimated_m": 0.6123398842884874,
+      "dynamic_m": 0.5679986662926629,
+      "extra_m": 0.6261304652004875,
+      "red_m": 0.7310678568447877,
+      "required_m": 0.611
+    }
+  },
+  "trajectory_rows": 8908,
+  "minimum_clearances_m": {
+    "estimated_clearance_m": 0.5852040919819764,
+    "dynamic_clearance_m": 0.5588029823423644,
+    "extra_clearance_m": 0.5588029823423644,
+    "red_clearance_m": 0.5483220505992306
+  },
+  "minimum_height_m": 0.21001326086091715,
+  "maximum_tilt_deg": 3.645686860954952,
+  "guard_events": 0,
+  "non_floor_contact_pairs": {},
+  "trajectory_audit_pass": true,
+  "replanned_arrival_pass": false,
+  "camera_only_map_verified": false,
+  "full_leg_sweep_verified": false,
+  "gate3_complete": false
+}

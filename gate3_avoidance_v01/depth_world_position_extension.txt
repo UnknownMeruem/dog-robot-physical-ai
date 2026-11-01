@@ -1,0 +1,108 @@
+# ===== Depth camera -> obstacle world position =====
+print("\n=== Camera-Based Obstacle Position Estimation ===")
+
+camera_id = mujoco.mj_name2id(
+    model, mujoco.mjtObj.mjOBJ_CAMERA, "dog_eye"
+)
+torso_id = mujoco.mj_name2id(
+    model, mujoco.mjtObj.mjOBJ_BODY, "torso"
+)
+
+if camera_id < 0 or torso_id < 0:
+    raise RuntimeError("Camera or torso body missing")
+
+with mujoco.Renderer(model, width=640, height=360) as r:
+    r.enable_depth_rendering()
+    r.update_scene(data, camera="dog_eye")
+    depth = r.render().copy()
+    r.disable_depth_rendering()
+
+h, w = depth.shape
+step = 4
+vv, uu = np.mgrid[0:h:step, 0:w:step]
+dd = depth[::step, ::step]
+
+valid = np.isfinite(dd) & (dd > 0.01) & (dd < 10.0)
+print("Valid depth pixels:", int(valid.sum()))
+
+if not np.any(valid):
+    print("OBSTACLE_POSITION_ESTIMATION: NO_VALID_DEPTH")
+else:
+    focal = h / (
+        2.0 * math.tan(
+            math.radians(float(model.cam_fovy[camera_id])) / 2.0
+        )
+    )
+
+    d = dd[valid].astype(float)
+    u = uu[valid]
+    v = vv[valid]
+
+    camera_points = np.column_stack((
+        (u + 0.5 - w/2) * d / focal,
+        -(v + 0.5 - h/2) * d / focal,
+        -d,
+    ))
+
+    cam_pos = data.cam_xpos[camera_id]
+    cam_rot = data.cam_xmat[camera_id].reshape(3, 3)
+    world_points = camera_points @ cam_rot.T + cam_pos
+
+    torso_pos = data.xpos[torso_id]
+    torso_rot = data.xmat[torso_id].reshape(3, 3)
+    body_points = (world_points - torso_pos) @ torso_rot
+
+    forward = -body_points[:, 0]
+    lateral = body_points[:, 1]
+    height = world_points[:, 2]
+
+    candidate = (
+        (height >= 0.06)
+        & (height <= 0.45)
+        & (forward > 0.0)
+        & (forward < 1.10)
+        & (np.abs(lateral) < 0.25)
+    )
+
+    print("Obstacle candidate points:", int(candidate.sum()))
+
+    if not np.any(candidate):
+        print("OBSTACLE_POSITION_ESTIMATION: NO_CANDIDATE")
+    else:
+        nearest = float(forward[candidate].min())
+
+        # Isolate a near surface layer rather than mixing
+        # all visible objects at different depths.
+        selected = candidate & (forward <= nearest + 0.15)
+        points = world_points[selected]
+        xy = points[:, :2]
+
+        estimated_xy = np.median(xy, axis=0)
+
+        print("Nearest forward distance:", f"{nearest:.3f}m")
+        print("Near-layer points:", len(points))
+        print("Observed XY median:", np.round(estimated_xy, 4))
+        print("Observed XY minimum:", np.round(xy.min(axis=0), 4))
+        print("Observed XY maximum:", np.round(xy.max(axis=0), 4))
+
+        # Known simulation geometry is used ONLY here
+        # to evaluate estimation, not to generate it.
+        actual = np.array([-0.95, 0.80])
+        error = float(np.linalg.norm(estimated_xy - actual))
+
+        print("Ground-truth box center:", actual)
+        print("Surface-median vs center error:", f"{error:.3f}m")
+        print("OBSTACLE_POSITION_ESTIMATION: MEASURED")
+
+        output = HERE / "detected_obstacle_world_points.csv"
+        np.savetxt(
+            output,
+            points,
+            delimiter=",",
+            header="world_x,world_y,world_z",
+            comments="",
+        )
+        print("Saved point cloud:", output)
+
+print("Visible surface points are not a full 3D box model.")
+print("Simulation only; not hardware-safe.")

@@ -1,0 +1,56 @@
+[
+  {
+    "case": "x_minus_05",
+    "expected": "SAFE_ARRIVAL_OR_VALIDATED_REFUSAL",
+    "status": "PASS",
+    "pass": true,
+    "returncode": 0,
+    "observed_points": 585,
+    "trace_samples": 12203
+  },
+  {
+    "case": "x_plus_05",
+    "expected": "SAFE_ARRIVAL_OR_VALIDATED_REFUSAL",
+    "status": "TRAJECTORY_OR_GUARD_FAIL",
+    "pass": false,
+    "returncode": 0,
+    "observed_points": 884,
+    "trace_samples": 4599
+  },
+  {
+    "case": "y_minus_05",
+    "expected": "SAFE_ARRIVAL_OR_VALIDATED_REFUSAL",
+    "status": "PASS",
+    "pass": true,
+    "returncode": 0,
+    "observed_points": 748,
+    "trace_samples": 16291
+  },
+  {
+    "case": "y_plus_05",
+    "expected": "SAFE_ARRIVAL_OR_VALIDATED_REFUSAL",
+    "status": "NO_ROBUST_ROUTE",
+    "pass": false,
+    "returncode": 0,
+    "observed_points": 669,
+    "trace_samples": 0
+  },
+  {
+    "case": "xy_shift",
+    "expected": "SAFE_ARRIVAL_OR_VALIDATED_REFUSAL",
+    "status": "NO_ROBUST_ROUTE",
+    "pass": false,
+    "returncode": 0,
+    "observed_points": 811,
+    "trace_samples": 0
+  },
+  {
+    "case": "nan_map_fault",
+    "expected": "GOAL_MAP_INVALID_REJECTED",
+    "status": "GOAL_MAP_INVALID_REJECTED",
+    "pass": true,
+    "returncode": 0,
+    "observed_points": 702,
+    "trace_samples": 0
+  }
+]

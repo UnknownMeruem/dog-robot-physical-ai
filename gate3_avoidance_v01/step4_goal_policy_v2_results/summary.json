@@ -1,0 +1,32 @@
+[
+  {
+    "case": "baseline",
+    "expected": "SAFE_GOAL_ARRIVAL",
+    "status": "PASS",
+    "goal_clearance_m": 0.5719999878220181,
+    "observed_points": 702,
+    "trace_samples": 12849,
+    "return_code": 0,
+    "pass": true
+  },
+  {
+    "case": "plus_10cm",
+    "expected": "SAFE_GOAL_REJECTION",
+    "status": "GOAL_UNSAFE_REJECTED",
+    "goal_clearance_m": 0.47047556380002353,
+    "observed_points": 634,
+    "trace_samples": 0,
+    "return_code": 0,
+    "pass": true
+  },
+  {
+    "case": "minus_10cm",
+    "expected": "SAFE_GOAL_ARRIVAL",
+    "status": "PASS",
+    "goal_clearance_m": 0.6717036266378681,
+    "observed_points": 799,
+    "trace_samples": 14017,
+    "return_code": 0,
+    "pass": true
+  }
+]

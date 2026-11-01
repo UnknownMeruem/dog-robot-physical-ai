@@ -1,0 +1,74 @@
+[
+  {
+    "case": "case_00",
+    "pass": true,
+    "arrival": true,
+    "valid_refusal": false
+  },
+  {
+    "case": "case_01",
+    "pass": true,
+    "arrival": false,
+    "valid_refusal": true
+  },
+  {
+    "case": "case_02",
+    "pass": true,
+    "arrival": true,
+    "valid_refusal": false
+  },
+  {
+    "case": "case_03",
+    "pass": true,
+    "arrival": false,
+    "valid_refusal": true
+  },
+  {
+    "case": "case_04",
+    "pass": true,
+    "arrival": false,
+    "valid_refusal": true
+  },
+  {
+    "case": "case_05",
+    "pass": true,
+    "arrival": true,
+    "valid_refusal": false
+  },
+  {
+    "case": "case_06",
+    "pass": true,
+    "arrival": true,
+    "valid_refusal": false
+  },
+  {
+    "case": "case_07",
+    "pass": true,
+    "arrival": true,
+    "valid_refusal": false
+  },
+  {
+    "case": "case_08",
+    "pass": true,
+    "arrival": false,
+    "valid_refusal": true
+  },
+  {
+    "case": "case_09",
+    "pass": true,
+    "arrival": false,
+    "valid_refusal": true
+  },
+  {
+    "case": "case_10",
+    "pass": true,
+    "arrival": false,
+    "valid_refusal": true
+  },
+  {
+    "case": "case_11",
+    "pass": true,
+    "arrival": false,
+    "valid_refusal": true
+  }
+]

@@ -1,0 +1,141 @@
+{
+  "source": "../gate3_avoidance_v01/test_step4_unified_x_minus_05.py",
+  "source_lines": 1682,
+  "assertions": {
+    "has_first_turn": true,
+    "has_corrective_turn": true,
+    "has_post_turn_candidates": true,
+    "has_guard": true,
+    "has_turn_controller": true,
+    "has_walk_controller": true,
+    "runtime_clearance_unchanged": true,
+    "planning_clearance_unchanged": true
+  },
+  "functions": [
+    {
+      "name": "yaw_deg",
+      "line": 110,
+      "end_line": 112
+    },
+    {
+      "name": "posture",
+      "line": 114,
+      "end_line": 122
+    },
+    {
+      "name": "set_legs",
+      "line": 124,
+      "end_line": 184
+    },
+    {
+      "name": "xy_clearance",
+      "line": 1017,
+      "end_line": 1023
+    },
+    {
+      "name": "angle_error",
+      "line": 1025,
+      "end_line": 1026
+    },
+    {
+      "name": "guard",
+      "line": 1028,
+      "end_line": 1055
+    },
+    {
+      "name": "record",
+      "line": 1057,
+      "end_line": 1075
+    },
+    {
+      "name": "soft_hold",
+      "line": 1077,
+      "end_line": 1095
+    },
+    {
+      "name": "turn_to",
+      "line": 1097,
+      "end_line": 1146
+    },
+    {
+      "name": "walk_to",
+      "line": 1148,
+      "end_line": 1234
+    },
+    {
+      "name": "inspect_step",
+      "line": 484,
+      "end_line": 513
+    },
+    {
+      "name": "estimated_clearance",
+      "line": 1307,
+      "end_line": 1312
+    },
+    {
+      "name": "segment",
+      "line": 1314,
+      "end_line": 1320
+    },
+    {
+      "name": "route_clearance",
+      "line": 1322,
+      "end_line": 1326
+    },
+    {
+      "name": "route_candidates",
+      "line": 1328,
+      "end_line": 1359
+    },
+    {
+      "name": "clearance",
+      "line": 831,
+      "end_line": 835
+    },
+    {
+      "name": "segment",
+      "line": 837,
+      "end_line": 843
+    }
+  ],
+  "turn_calls": [
+    {
+      "line": 1419,
+      "call": "turn_to(\"LIVE_TURN1\", via)"
+    },
+    {
+      "line": 1534,
+      "call": "turn_to(\"LIVE_FINAL_TURN\", goal)"
+    },
+    {
+      "line": 1472,
+      "call": "turn_to(\n                        \"LIVE_CORRECTIVE_TURN\",\n                        via\n                    )"
+    }
+  ],
+  "excerpt_file": "../gate3_avoidance_v01/step4_randomized_audit/controller_architecture_excerpt.txt",
+  "recommended_architecture": {
+    "pre_turn": [
+      "Validate camera observation and map",
+      "Evaluate target and complete route",
+      "Check prospective turning envelope",
+      "Do not start if estimated margin is insufficient"
+    ],
+    "during_turn": [
+      "Monitor posture and all known obstacle distances",
+      "Stop immediately on guard failure",
+      "Record actual swept geometry"
+    ],
+    "after_turn": [
+      "Hold and measure actual pose",
+      "Reobserve camera",
+      "Update obstacle map",
+      "Replan from actual pose",
+      "Retry only within explicit safety and iteration limits"
+    ],
+    "during_walk": [
+      "Continuously check new depth observations",
+      "Stop when a newly observed obstacle blocks the route",
+      "Repeat observation and replanning before resuming"
+    ]
+  }
+}
