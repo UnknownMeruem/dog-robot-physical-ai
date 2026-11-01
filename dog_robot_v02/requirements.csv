@@ -1,0 +1,13 @@
+ID,Category,Requirement,Provisional acceptance criterion,Verification,Priority,Status
+SR-001,Geometry,Small dog form factor,Overall length 0.35-0.45 m,CAD dimension check,Must,Provisional
+SR-002,Mass,Safe to lift and hold,Target 1.5 kg or less pending user assessment,Scale and user trial,Must,Provisional
+SR-003,Locomotion,Four-legged autonomous indoor locomotion,Walk and stop without falling on defined flat test floor,Simulation then physical test,Must,Unvalidated
+SR-004,Navigation,Obstacle avoidance,Stop before obstacles and do not approach unsafe edges,Scenario tests,Must,Future
+SR-005,Behavior,Initiate benign behaviors without command,At least rest / look / approach chosen according to context,Behavior trace tests,Must,Prototype scripted only
+SR-006,Respiration,Visible/tactile simulated breathing,Chest displacement 0-7 mm adjustable,Simulation and physical measurement,Should,Prototype geometric only
+SR-007,Touch,Detect petting on head/back,Distinguish at least two touch zones,Sensor test,Must,Future
+SR-008,Lift safety,Disable leg locomotion while lifted,No active walking upon detected lift; fail-safe test,Must,Future
+SR-009,Softness,Dog-like tactile shell,No exposed rigid edges on contact surfaces; user acceptance,Material samples and handling trials,Must,Future
+SR-010,Speech,Understand limited Japanese commands,Recognize agreed vocabulary in ordinary household conditions,Scenario test,Should,Future
+SR-011,Safety,Motion stop and safe power management,Test accessible stop control and thermal/electrical fault behavior,Hazard tests,Must,Future
+SR-012,Privacy,Optional wellness data with consent,No sharing without affirmative permission,Privacy review,Must,Future

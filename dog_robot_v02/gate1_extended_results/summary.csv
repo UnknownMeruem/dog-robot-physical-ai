@@ -1,0 +1,7 @@
+case,min_height_m,max_tilt_deg,max_actuator_force,candidate_pass
+baseline,0.2157,0.372,2.5132741228718345,True
+push_1N,0.2157,0.372,2.5132741228718345,True
+push_3N,0.2157,0.372,2.5132741228718345,True
+mass_plus_300g,0.2155,0.351,2.5132741228718345,True
+mass_plus_600g,0.2154,0.331,2.5132741228718345,True
+motors_off,0.1102,27.375,0.0,False
