@@ -16,3 +16,6 @@ __pycache__/
 !.env.example
 .vscode/
 .idea/
+
+# Windows download metadata
+*:Zone.Identifier
